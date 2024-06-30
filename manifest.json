@@ -1,0 +1,11 @@
+{
+	"id": "obsidian-sync4_couchdb-os",
+	"name": "同步插件cos",
+	"version": "1.0.0",
+	"minAppVersion": "0.15.0",
+	"description": "这是一个用于同步的插件",
+	"author": "Obsidian",
+	"authorUrl": "https://obsidian.md",
+	"fundingUrl": "https://obsidian.md/pricing",
+	"isDesktopOnly": false
+}

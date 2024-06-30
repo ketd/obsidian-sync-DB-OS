@@ -1,0 +1,55 @@
+/*
+
+This CSS file will be included with your plugin, and
+available in the app when your plugin is enabled.
+
+If your plugin does not need CSS, delete this file.
+
+*/
+.remark {
+	border: 1px solid var(--background-modifier-border);
+	padding: 10px;
+	margin-top: 20px;
+	margin-bottom: 20px;
+	border-radius: 5px;
+	background-color: var(--background-primary);
+}
+
+.remark__title {
+	font-weight: 600;
+	margin-bottom: 10px;
+}
+
+.remark__author {
+	color: var(--text-muted);
+	margin-bottom: 5px;
+	display: block;
+}
+
+.remark__list {
+	list-style-type: disc;
+	padding-left: 20px;
+	margin-top: 5px;
+	margin-bottom: 10px;
+}
+
+.remark__item {
+	margin-bottom: 5px;
+	color: var(--text-normal);
+}
+
+.image-container {
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+.local-image {
+	max-width: 100%; /* 控制图片宽度 */
+	height: auto; /* 保持图片比例 */
+}
+.remark-image {
+	max-width: 100%; /* 确保图片不超过容器宽度 */
+	height: auto;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 5px;
+}
