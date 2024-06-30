@@ -1,23 +1,34 @@
-import {App, Editor, MarkdownView, Modal, Notice, Plugin, TFile} from 'obsidian';
+import {App, Editor, MarkdownFileInfo, MarkdownView, Modal, Notice, Plugin, TFile} from 'obsidian';
 import {Snowflake} from './util/Snowflake';
 import {DEFAULT_SETTINGS, MyPluginSettings, SampleSettingTab} from './setting/MyPluginSettings';
 import {uploadImage} from './util/UploadImage';
+import MarkdownDocument, {MongoDBServer} from "./util/MongoDBServer";
 
 export default class MyPlugin extends Plugin {
 	settings: MyPluginSettings;
+	syncTimer: NodeJS.Timeout | null = null; // 用于存储定时器的引用
+
+
 
 	async onload() {
 		await this.loadSettings();
 		const snowflake = new Snowflake(BigInt(1), BigInt(1));
+		const mongoDBServer = new MongoDBServer(this.settings);
+
+		let throttleInterval = this.settings.Throttling * 1000; // 设置节流时间间隔为 1000 毫秒
+		let lastUpdateTime = 0; // 记录上次更新时间戳
+		let updatePending = false; // 记录是否有更新操作待处理
+
+		// 启动定时同步任务
+		this.startSyncTimer();
 
 		this.registerEvent(
 			this.app.vault.on('create', async (file) => {
-				const snowflake = new Snowflake(BigInt(1), BigInt(1));
-
 				if (file instanceof TFile && file.extension === 'md') {
 					const content = await this.app.vault.read(file);
-					// 上传Markdown内容到CouchDB
-					// await this.uploadNoteToCouchDB(file.path, content);
+					console.log("创建md" + content);
+					// 上传Markdown内容到MongoDB
+					await this.uploadNoteToMongoDB(file.name, file.name, mongoDBServer);
 				}
 			})
 		);
@@ -35,7 +46,7 @@ export default class MyPlugin extends Plugin {
 							if (file) {
 								const fileName = snowflake.nextId() + '.' + item.type.split('/')[1];
 
-								if (this.settings.ReplacesTheDefaultInsert){
+								if (this.settings.ReplacesTheDefaultInsert) {
 									if (this.settings.IsSaveLocally) {
 										evt.preventDefault();// 阻止粘贴事件
 										// 保存文件到本地
@@ -46,10 +57,11 @@ export default class MyPlugin extends Plugin {
 										this.insertImageUrl(editor, fileName, imageUrl);
 									} else {
 										// 直接上传文件到对象存储
+										evt.preventDefault();// 阻止粘贴事件
 										const imageUrl = await uploadImage(file, fileName, this.settings);
 										this.insertImageUrl(editor, fileName, imageUrl);
 									}
-								}else{
+								} else {
 
 								}
 
@@ -57,9 +69,30 @@ export default class MyPlugin extends Plugin {
 						}
 					}
 				}
+
+
 			})
 		);
 
+		this.registerEvent(
+			this.app.workspace.on('editor-change', async (editor: Editor, info: MarkdownView | MarkdownFileInfo) => {
+
+				if (info instanceof MarkdownView) {
+					const currentTime = Date.now();
+
+					if (this.settings.IsUpdateDoc) {
+
+						// 节流逻辑：检查距离上次更新的时间是否超过节流间隔
+						if (!updatePending && (currentTime - lastUpdateTime) > throttleInterval) {
+							updatePending = true;
+							await this.updateNoteToMongoDB(info, mongoDBServer);
+							lastUpdateTime = currentTime;
+							updatePending = false;
+						}
+					}
+				}
+			})
+		);
 
 
 
@@ -125,6 +158,7 @@ export default class MyPlugin extends Plugin {
 		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
 	}
 
+
 	insertImageUrl(editor: Editor, fileName: string, imageUrl: string) {
 		const cursor = editor.getCursor();
 		editor.replaceRange(`![${fileName}](${imageUrl})`, cursor);
@@ -137,8 +171,6 @@ export default class MyPlugin extends Plugin {
 	}
 
 
-
-
 	onunload() {
 		// 插件卸载时的清理工作
 	}
@@ -149,6 +181,57 @@ export default class MyPlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
+	}
+
+
+	private async uploadNoteToMongoDB(path: string, content: string, mongoDBServer: MongoDBServer) {
+		const markdownDocument: MarkdownDocument = {
+			_id: path,
+			content: content,
+			version: "1.0",
+		}
+		await mongoDBServer.insertOneDocument(markdownDocument);
+
+	}
+
+	private async updateNoteToMongoDB(info: MarkdownView | MarkdownFileInfo, mongoDBServer: MongoDBServer) {
+		if (info instanceof MarkdownView) {
+			const documentId = info.getDisplayText(); // 假设使用文件名作为 MongoDB 中的 _id
+			const markdownContent = info.getViewData(); // 获取编辑器中的 Markdown 内容
+
+			// 更新到 MongoDB
+			await mongoDBServer.updateDocument({
+				_id: documentId,
+				content: markdownContent,
+				version: '1.0' // 假设版本号为固定值或通过其他方式获取
+			});
+		}
+	}
+
+	startSyncTimer() {
+		// 如果已经存在定时器，先清理之前的定时器
+		this.clearSyncTimer();
+
+		const syncInterval = this.settings.SyncInterval * 1000; // 将设置的秒数转换为毫秒
+
+		// 设置定时器，每隔 syncInterval 毫秒执行一次同步操作
+		this.syncTimer = setInterval(async () => {
+			await this.syncAllNotesToMongoDB();
+		}, syncInterval);
+	}
+
+	clearSyncTimer() {
+		// 清理定时器
+		if (this.syncTimer) {
+			clearInterval(this.syncTimer);
+			this.syncTimer = null;
+		}
+	}
+
+	//TODO 实现同步所有笔记到 MongoDB 的逻辑
+	async syncAllNotesToMongoDB() {
+		// 实现同步所有笔记到 MongoDB 的逻辑
+		// 遍历所有笔记，调用 updateDocument 或者其他同步方法
 	}
 
 
