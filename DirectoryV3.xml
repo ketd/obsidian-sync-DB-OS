@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+ <trees>
+     <tree path="/src/sync/ManualSyncing.ts" title="手动同步"/>
+	 <tree path="/src/util/CompareFiles.ts" title="文档对比"/>
+	 <tree path="/src/util/Snowflake.ts" title="雪花算法生成图片唯一id"/>
+	 <tree path="/src/util/MongoDBServer.ts" title="mongodb客户端"/>
+	 <tree path="/src/util/UploadToTencentOS.ts" title="上传腾讯云OS"/>
+     <tree path="/src/util/DatabaseFactory.ts" title="数据库连接工厂"/>
+ </trees>

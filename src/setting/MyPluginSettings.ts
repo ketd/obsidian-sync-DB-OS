@@ -1,12 +1,11 @@
-import {PluginSettingTab, Setting, Notice, App} from 'obsidian';
-import {CouchDBServer} from "../util/CouchDBServer";
-import {MongoDBServer} from "../util/MongoDBServer";
+import {PluginSettingTab, Setting, Notice, App, Platform} from 'obsidian';
+import {DatabaseFactory} from "../util/DatabaseFactory";
 
 export interface MyPluginSettings {
 	//替换默认插入，直接使用图传
 	ReplacesTheDefaultInsert: boolean;
 	ObjectStorageProvider: string;
-	DataBase: string;
+	DatabaseType: string;
 	// 插件设置
 	//腾讯云
 	SecretIdByTencent: string;
@@ -21,6 +20,7 @@ export interface MyPluginSettings {
 
 	//CouchDB
 	URLByCouchDB: string;
+	PortByCouchDB: string;
 	USerNameByCouchDB: string;
 	PasswordByCouchDB: string;
 	DateBaseNameByCouchDB: string;
@@ -39,6 +39,11 @@ export interface MyPluginSettings {
 
 	//是否保存到本地
 	IsSaveLocally: boolean;
+	IsCreateSubfolders :boolean
+	SubfoldersName:string
+
+	//其他设置
+	//NeverDeleteLocal
 
 
 }
@@ -47,7 +52,7 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 
 	ReplacesTheDefaultInsert: false,
 	ObjectStorageProvider: 'tencent',
-	DataBase:'MongoDB',
+	DatabaseType:'CouchDB',
 	SecretIdByTencent: '',
 	SecretKeyByTencent: '',
 	BucketByTencent: '',
@@ -58,6 +63,7 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	RegionByAliyun: '',
 
 	URLByCouchDB: '',
+	PortByCouchDB:'5984',
 	USerNameByCouchDB: '',
 	PasswordByCouchDB: '',
 	DateBaseNameByCouchDB: '',
@@ -74,6 +80,8 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	SyncInterval: 300, // 默认同步间隔为 300 秒 (5 分钟)
 
 	IsSaveLocally: true,
+	IsCreateSubfolders:true,
+	SubfoldersName:'img'
 
 }
 
@@ -121,17 +129,27 @@ export class SampleSettingTab extends PluginSettingTab {
 		if(this.plugin.settings.IsUpdateDoc){
 			containerEl.createEl("h1", {text: "数据库配置"});
 			// 对象存储服务商选择项
+
 			new Setting(containerEl)
 				.setName('选择数据库')
-				.setDesc('目前仅支持MongoDB')
+				.setDesc('目前支持MongoDB和CouchDB')
 				.addDropdown(dropdown => {
-					dropdown
-						.addOption('MongoDB', 'MongoDB')
-						.addOption('CouchDB', 'CouchDB')
-						.setValue(this.plugin.settings.DataBase)
+					// 如果是移动平台，只添加CouchDB作为选项
+					if (Platform.isMobile) {
+						dropdown.addOption('CouchDB', 'CouchDB');
+					} else {
+						// 在非移动平台，添加MongoDB和CouchDB作为选项
+						dropdown.addOption('MongoDB', 'MongoDB')
+							.addOption('CouchDB', 'CouchDB');
+					}
+
+					dropdown.setValue(this.plugin.settings.DatabaseType)
 						.onChange(async (value) => {
-							this.plugin.settings.DataBase = value;
+							this.plugin.settings.DatabaseType = value;
+							await this.plugin.saveSettings();
+							await this.plugin.onload(); // 重新加载插件
 							this.display(); // 重新加载设置面板
+							new Notice('切换数据源成功');
 						});
 				});
 
@@ -169,17 +187,17 @@ export class SampleSettingTab extends PluginSettingTab {
 					.addOption('30', '30 秒')
 					.addOption('60', '60 秒')
 					.addOption('300', '300 秒')
-					.setValue(String(this.plugin.settings.ThrottlingInterval))
+					.setValue(String(this.plugin.settings.Throttling))
 					.onChange(async (value) => {
 						const parsedValue = parseInt(value, 10);
 						if (!isNaN(parsedValue)) {
-							this.plugin.settings.ThrottlingInterval = parsedValue;
+							this.plugin.settings.Throttling = parsedValue;
 							await this.plugin.saveSettings();
 						} else {
 							// 如果发生无效的选择，可以做出相应提示或处理
 							new Notice('无效的选择');
 							// 恢复为当前设置的值
-							dropdown.setValue(String(this.plugin.settings.ThrottlingInterval));
+							dropdown.setValue(String(this.plugin.settings.Throttling));
 						}
 					}));
 
@@ -234,8 +252,23 @@ export class SampleSettingTab extends PluginSettingTab {
 					.setValue(this.plugin.settings.IsSaveLocally)
 					.onChange(async (value) => {
 						this.plugin.settings.IsSaveLocally = value;
+						this.display(); //
 					});
 			});
+		if(this.plugin.settings.IsSaveLocally){
+			new Setting(containerEl)
+				.setName('子文件夹名称')
+				.setDesc('如果当前文件在"vault/folder"中，而设置子文件夹名称为"img"，则附件将被保存至"vault/folder/img" 路径下。')
+				.addText(text => {
+					text
+						.setPlaceholder('img')
+						.setValue(this.plugin.settings.SubfoldersName)
+						.onChange(async (value) => {
+							this.plugin.settings.SubfoldersName = value;
+						});
+
+				});
+		}
 
 
 
@@ -243,16 +276,16 @@ export class SampleSettingTab extends PluginSettingTab {
 
 
 	displayDBSettings( containerEl: HTMLElement): void {
-		if (this.plugin.settings.DataBase === 'MongoDB') {
+		if (this.plugin.settings.DatabaseType === 'MongoDB') {
 			this.displayMongoDBSettings(containerEl);
-		} else if (this.plugin.settings.DataBase === 'CouchDB') {
+		} else if (this.plugin.settings.DatabaseType === 'CouchDB') {
 			this.displayCouchDBSettings(containerEl);
 		}
 	}
 
 	displayMongoDBSettings(containerEl: HTMLElement): void {
 
-		const mongoDBServer = new MongoDBServer(this.plugin.settings);
+		const factory = new DatabaseFactory(this.plugin.settings);
 		containerEl.createEl("h3", {text: "MongoDB配置"});
 
 		// URL 设置项
@@ -268,6 +301,7 @@ export class SampleSettingTab extends PluginSettingTab {
 						this.plugin.settings.URLByMongoDB = value;
 					});
 				this.inputDBElements.push(text.inputEl); // 存储输入元素的引用
+
 			})
 
 
@@ -369,13 +403,14 @@ export class SampleSettingTab extends PluginSettingTab {
 				button
 					.setButtonText('测试连接')
 					.onClick(async () => {
-						await mongoDBServer.testConnection()
+						await factory.getServer().testConnection()
 					});
 			});
 	}
 	displayCouchDBSettings(containerEl: HTMLElement): void {
 
-		const couchDBServer =  new CouchDBServer(this.plugin.settings);
+		const factory =  new DatabaseFactory(this.plugin.settings);
+
 
 		containerEl.createEl("h3", {text: "CouchDB配置"});
 
@@ -389,6 +424,21 @@ export class SampleSettingTab extends PluginSettingTab {
 					.setDisabled(true)
 					.onChange(async (value) => {
 						this.plugin.settings.URLByCouchDB = value;
+					});
+				this.inputDBElements.push(text.inputEl); // 存储输入元素的引用
+
+			});
+
+		new Setting(containerEl)
+			.setName('端口')
+			.setDesc('默认为5984')
+			.addText(text => {
+				text
+					.setPlaceholder('请输入端口')
+					.setValue(this.plugin.settings.PortByCouchDB)
+					.setDisabled(true)
+					.onChange(async (value) => {
+						this.plugin.settings.PortByCouchDB = value;
 					});
 				this.inputDBElements.push(text.inputEl); // 存储输入元素的引用
 			});
@@ -445,12 +495,18 @@ export class SampleSettingTab extends PluginSettingTab {
 						isEdit = !isEdit;
 						if (isEdit) {
 							// 启用所有输入框和切换
-							this.inputDBElements.forEach(input => input.disabled = false);
+							this.inputDBElements.forEach(input => {
+								input.disabled = false
+								input.type='text'
+							});
 							button.setButtonText('保存');
 						} else {
 							// 保存设置并禁用所有输入框和切换
 							await this.plugin.saveSettings();
-							this.inputDBElements.forEach(input => input.disabled = true);
+							this.inputDBElements.forEach(input => {
+								input.disabled = true
+								input.type = 'password';
+							});
 							button.setButtonText('修改');
 							new Notice('保存成功');
 						}
@@ -462,8 +518,8 @@ export class SampleSettingTab extends PluginSettingTab {
 				button
 					.setButtonText('测试连接')
 					.onClick(async () => {
-
-						await couchDBServer.testConnection().then(res => {})
+						console.log(this.plugin.settings)
+						await factory.getServer().testConnection().then(res => {})
 					});
 			});
 
@@ -537,6 +593,7 @@ export class SampleSettingTab extends PluginSettingTab {
 			cls: "remark__author"
 		});
 
+		let isEdit = false;
 
 		// SecretId 设置项
 		new Setting(containerEl)
@@ -550,6 +607,9 @@ export class SampleSettingTab extends PluginSettingTab {
 						this.plugin.settings.SecretIdByTencent = value;
 					});
 				this.inputOSElements.push(text.inputEl); // 存储输入元素的引用
+				// 初始状态设置为密码类型
+
+
 			});
 
 		// SecretKey 设置项
@@ -564,6 +624,7 @@ export class SampleSettingTab extends PluginSettingTab {
 						this.plugin.settings.SecretKeyByTencent = value;
 					});
 				this.inputOSElements.push(text.inputEl); // 存储输入元素的引用
+
 			});
 
 		// Bucket 设置项
@@ -597,7 +658,7 @@ export class SampleSettingTab extends PluginSettingTab {
 			});
 
 
-		let isEdit = false;
+
 		// 保存/修改设置按钮
 		const editButtonSetting = new Setting(containerEl)
 			.addButton(button => {
@@ -607,12 +668,19 @@ export class SampleSettingTab extends PluginSettingTab {
 						isEdit = !isEdit;
 						if (isEdit) {
 							// 启用所有输入框和切换
-							this.inputOSElements.forEach(input => input.disabled = false);
+							this.inputOSElements.forEach(input => {
+								input.disabled = false;
+								input.type= 'text';
+							});
 							button.setButtonText('保存');
 						} else {
 							// 保存设置并禁用所有输入框和切换
 							await this.plugin.saveSettings();
-							this.inputOSElements.forEach(input => input.disabled = true);
+							this.inputOSElements.forEach(input => {
+								input.disabled = true
+								//TODO 设置类型不能实现隐藏字段
+								input.type = 'password';
+							});
 							button.setButtonText('修改');
 							new Notice('保存成功');
 						}

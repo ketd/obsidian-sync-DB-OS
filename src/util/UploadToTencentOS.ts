@@ -1,7 +1,7 @@
 import COS from 'cos-js-sdk-v5';
 import { MyPluginSettings } from '../setting/MyPluginSettings';
 
-export async function uploadImage(file: File, fileExtension: string, settings: MyPluginSettings): Promise<string> {
+export async function uploadToTencentOS(file: File, fileExtension: string, settings: MyPluginSettings): Promise<string> {
 	return new Promise(async (resolve, reject) => {
 		const cos = new COS({
 			SecretId: settings.SecretIdByTencent,
