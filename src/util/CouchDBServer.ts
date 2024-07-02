@@ -11,7 +11,7 @@ export class CouchDBServer {
 		// 注意：我们不能在构造函数中等待异步操作完成，
 		// 所以建议在调用init之后的其他地方处理实际的初始化逻辑。
 		this.init().then(() => {
-			console.log('CouchDB 初始化完成');
+			console.log('CouchDB  初始化完成');
 			// 进行其他需要在初始化之后的操作
 		}).catch((error) => {
 			console.error('初始化失败:', error);
