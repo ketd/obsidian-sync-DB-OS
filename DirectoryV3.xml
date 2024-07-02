@@ -6,4 +6,5 @@
 	 <tree path="/src/util/MongoDBServer.ts" title="mongodb客户端"/>
 	 <tree path="/src/util/UploadToTencentOS.ts" title="上传腾讯云OS"/>
      <tree path="/src/util/DatabaseFactory.ts" title="数据库连接工厂"/>
+     <tree path="/src/util/TencentOSServer.ts" title="腾讯云OS"/>
  </trees>

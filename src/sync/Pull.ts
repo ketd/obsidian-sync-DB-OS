@@ -1,17 +1,26 @@
-import {App, Notice, TFile} from 'obsidian';
-import { MongoDBServer } from '../util/MongoDBServer';
+import {App, Notice} from 'obsidian';
 import {DatabaseFactory} from "../util/DatabaseFactory";
+import {TencentOSServer} from "../util/TencentOSServer";
+import {Util} from "../util/Util";
 
-export async function pull(app: App, factory: DatabaseFactory) {
-	const allDocumentIds = await factory.getServer().getAllDocumentIds();
+
+export async function pull(app: App, factory: DatabaseFactory,tencentOSServer:TencentOSServer) {
+	const server = await factory.getServer();
+	const allDocumentIds = await server.getAllDocumentIds();
 	console.log(allDocumentIds);
+	const util =new Util();
 
 	for (const id of allDocumentIds) {
 		const file = app.vault.getAbstractFileByPath(id);
 		if (!file) {
 			// Obsidian 中不存在此文件，获取文档内容并创建相应的笔记
-			const document = await factory.getServer().getDocument(id);
-			if (document) {
+			const document = await server.getDocument(id);
+			if (document?.fileType === 'pdf') {
+				await tencentOSServer.downFileToOS(document._id).then(async (res) => {
+					await util.SaveFileToLocally(app, document._id, res)
+
+				});
+			} else if (document) {
 				const filePath = document._id;
 				const fileContent = document.content;
 
@@ -19,7 +28,7 @@ export async function pull(app: App, factory: DatabaseFactory) {
 				const folderPath = filePath.substring(0, filePath.lastIndexOf('/'));
 
 				try {
-					await createFolderIfNotExists(app, folderPath);
+					await util.createFolderIfNotExists(app, folderPath);
 				}catch (e){
 				}
 
@@ -31,14 +40,3 @@ export async function pull(app: App, factory: DatabaseFactory) {
 	new Notice('拉取云端成功!');
 }
 
-// 创建文件夹，如果不存在
-async function createFolderIfNotExists(app: App, folderPath: string) {
-	const folder = app.vault.getAbstractFileByPath(folderPath);
-	if (!folder) {
-		const parentFolder = folderPath.substring(0, folderPath.lastIndexOf('/'));
-		if (parentFolder) {
-			await createFolderIfNotExists(app, parentFolder);
-		}
-		await app.vault.createFolder(folderPath);
-	}
-}

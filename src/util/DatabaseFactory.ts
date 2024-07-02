@@ -1,12 +1,11 @@
 import { MyPluginSettings } from '../setting/MyPluginSettings';
-import {MongoDBServer} from './MongoDBServer';
-import {CouchDBServer} from './CouchDBServer';
+import { CouchDBServer } from './CouchDBServer';
 import MarkdownDocument from './MarkdownDocument';
-import {Platform} from "obsidian";
+import { Platform } from 'obsidian';
 
 interface IDatabaseServer {
 	testConnection(): Promise<boolean>;
-	upsertDocument(doc: MarkdownDocument): Promise<void>;
+	upsertDocument(doc: MarkdownDocument): Promise<boolean>;
 	deleteDocument(docId: string): Promise<void>;
 	getDocument(docId: string): Promise<MarkdownDocument | null>;
 	getAllDocumentIds(): Promise<string[]>;
@@ -14,28 +13,48 @@ interface IDatabaseServer {
 }
 
 export class DatabaseFactory {
-	private readonly server: IDatabaseServer;
+	private server: IDatabaseServer | null = null;
+	private readonly initializationPromise: Promise<void>;
 
 	constructor(private settings: MyPluginSettings) {
-		this.server = this.createServer();
+		// 初始化服务器并存储 promise
+		this.initializationPromise = this.initializeServer();
 	}
 
-	private createServer(): IDatabaseServer {
+	// 异步初始化服务器
+	private async initializeServer() {
+		this.server = await this.createServer();
+	}
 
-		return new CouchDBServer(this.settings);
-	/*	if (this.settings.DatabaseType === 'MongoDB'&&!Platform.isMobile) {
-			console.log("创建MongoDB实例")
-			return new MongoDBServer(this.settings);
-		} else if (this.settings.DatabaseType === 'CouchDB') {
-			console.log("创建CouchDB实例")
+	// 将 createServer 修改为异步并使用动态导入
+	private async createServer(): Promise<IDatabaseServer> {
+		console.log("Checking platform...");
+		console.log("Platform.isMobile:", Platform.isMobile);
+
+		if (Platform.isMobile) {
+			console.log("Creating CouchDB instance for mobile");
 			return new CouchDBServer(this.settings);
 		} else {
-			throw new Error('Unsupported database type');
-		}*/
+			console.log("Creating database instance for non-mobile");
+			if (this.settings.DatabaseType === 'MongoDB') {
+				console.log("Creating MongoDB instance");
+				const { MongoDBServer } = await import('./MongoDBServer'); // 使用动态导入
+				return new MongoDBServer(this.settings);
+			} else if (this.settings.DatabaseType === 'CouchDB') {
+				console.log("Creating CouchDB instance");
+				return new CouchDBServer(this.settings);
+			} else {
+				throw new Error('Unsupported database type');
+			}
+		}
 	}
 
-
-	public getServer(): IDatabaseServer {
+	// 确保 getServer 等待初始化完成
+	public async getServer(): Promise<IDatabaseServer> {
+		await this.initializeServer();
+		if (!this.server) {
+			throw new Error("Database server initialization failed.");
+		}
 		return this.server;
 	}
 }

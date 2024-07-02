@@ -5,13 +5,13 @@ import {CompareFiles} from "../util/CompareFiles";
 import {DatabaseFactory} from "../util/DatabaseFactory";
 
 export async function manualSyncing(env: MouseEvent, app: App, settings: MyPluginSettings, factory: DatabaseFactory) {
-
+	const server = await factory.getServer();
 	const activeFile = app.workspace.getActiveFile();
 	if (activeFile instanceof TFile) {
 		try {
 
 			const fileContent = await app.vault.read(activeFile);
-			const result = await factory.getServer().getDocument(activeFile.path);
+			const result = await server.getDocument(activeFile.path);
 			if (result) {
 				if (fileContent !== result.content) {
 					console.log(`本地内容和云内容不同:${activeFile.path}`);

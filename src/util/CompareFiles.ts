@@ -46,7 +46,7 @@ export class CompareFiles {
 				if (result.isConfirmed) {
 					// Use local file to overwrite cloud
 					const factory = new DatabaseFactory(settings);
-					await factory.getServer().upsertDocument({
+					await (await factory.getServer()).upsertDocument({
 						_id: file.path,
 						content: localContent,
 						_rev: cloudResult._rev // Assuming this is retrieved from cloud

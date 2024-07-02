@@ -95,7 +95,7 @@ export class MongoDBServer {
 	}
 
 
-	async upsertDocument(doc: MarkdownDocument): Promise<void> {
+	async upsertDocument(doc: MarkdownDocument): Promise<boolean> {
 		try {
 			await this.connectToDatabase();
 			if (!this.collection) throw new Error('Collection is not initialized');
@@ -109,11 +109,13 @@ export class MongoDBServer {
 
 			);
 			new Notice("上传成功" + new Date().toLocaleString())
+			return true;
 
 		} catch (error) {
 			console.error(error);
 
 			new Notice("上传失败" + new Date().toLocaleString())
+			return false;
 		}
 	}
 	async updateDocumentPath(oldPath: string, newPath: string) {

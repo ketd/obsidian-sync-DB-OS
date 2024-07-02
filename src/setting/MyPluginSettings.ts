@@ -76,7 +76,7 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
     PasswordByMongoDB: '',
     DateBaseNameByMongoDB: '',
 	CollectionName:'',
-	Throttling:5,
+	Throttling:300,
 	SyncInterval: 300, // 默认同步间隔为 300 秒 (5 分钟)
 
 	IsSaveLocally: true,
@@ -189,15 +189,18 @@ export class SampleSettingTab extends PluginSettingTab {
 					.addOption('300', '300 秒')
 					.setValue(String(this.plugin.settings.Throttling))
 					.onChange(async (value) => {
-						const parsedValue = parseInt(value, 10);
+						const parsedValue = Number(value);
 						if (!isNaN(parsedValue)) {
 							this.plugin.settings.Throttling = parsedValue;
 							await this.plugin.saveSettings();
+							await this.plugin.onload(); // 重新加载插件
 						} else {
 							// 如果发生无效的选择，可以做出相应提示或处理
 							new Notice('无效的选择');
 							// 恢复为当前设置的值
 							dropdown.setValue(String(this.plugin.settings.Throttling));
+							await this.plugin.saveSettings();
+							await this.plugin.onload(); // 重新加载插件
 						}
 					}));
 
@@ -230,6 +233,8 @@ export class SampleSettingTab extends PluginSettingTab {
 						.onChange(async (value) => {
 							this.plugin.settings.ObjectStorageProvider = value;
 							this.display(); // 重新加载设置面板
+							await this.plugin.saveSettings();
+							await this.plugin.onload(); // 重新加载插件
 						});
 				});
 
@@ -403,7 +408,7 @@ export class SampleSettingTab extends PluginSettingTab {
 				button
 					.setButtonText('测试连接')
 					.onClick(async () => {
-						await factory.getServer().testConnection()
+						await (await factory.getServer()).testConnection()
 					});
 			});
 	}
@@ -519,7 +524,7 @@ export class SampleSettingTab extends PluginSettingTab {
 					.setButtonText('测试连接')
 					.onClick(async () => {
 						console.log(this.plugin.settings)
-						await factory.getServer().testConnection().then(res => {})
+						await (await factory.getServer()).testConnection().then(res => {})
 					});
 			});
 

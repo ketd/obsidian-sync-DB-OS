@@ -1,6 +1,7 @@
 import esbuild from "esbuild";
 import process from "process";
 import builtins from "builtin-modules";
+import { resolve } from "path";
 
 const banner =
 	`/*
@@ -11,11 +12,14 @@ const banner =
 
 const prod = (process.argv[2] === "production");
 
+// 使用 resolve 来获取 'events' 模块的路径
+const eventsPath = resolve('node_modules/events/');
+
 const context = await esbuild.context({
 	banner: {
 		js: banner,
 	},
-	entryPoints: ["src/main.ts"],
+	entryPoints: ["./src/main.ts"],
 	bundle: true,
 	external: [
 		"obsidian",
@@ -31,9 +35,15 @@ const context = await esbuild.context({
 		"@lezer/common",
 		"@lezer/highlight",
 		"@lezer/lr",
-		...externalModules, // 使用过滤后的 builtins
+		...builtins
 	],
-	alias: { punycode: 'punycode' },
+	alias: {
+		'events': eventsPath,
+		'punycode': 'punycode'
+	},
+	define:{
+		global: 'globalThis'
+	},
 	format: "cjs",
 	target: "es2020",
 	logLevel: "info",

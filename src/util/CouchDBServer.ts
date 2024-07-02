@@ -1,10 +1,10 @@
-import  PouchDB from 'pouchdb';
 import {MyPluginSettings} from '../setting/MyPluginSettings';
 import {Notice} from "obsidian";
 import MarkdownDocument from "./MarkdownDocument";
 
 
 export class CouchDBServer {
+	private PouchDB = require('pouchdb-browser');
 	private db: PouchDB.Database;
 
 	constructor(private settings: MyPluginSettings) {
@@ -28,7 +28,7 @@ export class CouchDBServer {
 		const fullURL = `http://${encodeURIComponent(username)}:${encodeURIComponent(password)}@${URL}:${port}/${databaseName}`;
 
 		try {
-			this.db = new PouchDB(fullURL);
+			this.db = new this.PouchDB(fullURL);
 			console.log('CouchDB 初始化成功');
 		} catch (error) {
 			console.error('Error initializing PouchDB instance:', error);
@@ -50,24 +50,33 @@ export class CouchDBServer {
 	}
 
 	// 创建或更新文档
-	public async upsertDocument(doc: MarkdownDocument): Promise<void> {
+	public async upsertDocument(doc: MarkdownDocument): Promise<boolean> {
 		try {
 			const existingDoc = await this.db.get<MarkdownDocument>(doc._id);
+			console.log("existingDoc", existingDoc);
 			doc._rev = existingDoc._rev;
 		} catch (err) {
 			if (err.status !== 404) {
-				throw err;
+				return false;
 			}
 		}
 
 		try {
-			await this.db.put(doc);
-			new Notice('文档保存成功');
-		} catch (error) {
-			console.error('文档保存失败:', error);
-			new Notice('文档保存失败');
+			await this.db.put<MarkdownDocument>(doc);
+			new Notice('文档保存成功!!');
+			return true;
+		} catch (err) {
+			if (err.name === 'conflict') {
+				console.error('文档保存冲突:', err);
+				new Notice('文档保存冲突!!');
+			} else {
+				console.error('文档保存失败:', err);
+				new Notice('文档保存失败!!');
+			}
+			return false;
 		}
 	}
+
 
 	// 删除文档
 	public async deleteDocument(docId: string): Promise<void> {
@@ -108,16 +117,41 @@ export class CouchDBServer {
 		}
 	}
 
-	async updateDocumentPath(oldPath: string, newPath: string) {
+	async updateDocumentPath(oldPath: string, newPath: string): Promise<void> {
 		try {
+			// 获取旧文档
+			const doc = await this.db.get<MarkdownDocument>(oldPath);
 
+			// 尝试存储新文档，如果存在冲突则更新文档
+			let updatedDoc:MarkdownDocument  = {
+				...doc,
+				_id: newPath,
+				_rev: undefined // 确保未通过本地_rev
+			};
 
-			new Notice("文件重命名成功: " + new Date().toLocaleString());
+			try {
+				await this.db.put(updatedDoc);
+			} catch (putError: any) {
+				if (putError.status === 409) {
+					// 获取现有文档的最新修订版本
+					const existingDoc = await this.db.get<MarkdownDocument>(newPath);
+					updatedDoc._rev = existingDoc._rev;
+					await this.db.put(updatedDoc);
+				} else {
+					throw putError;
+				}
+			}
+
+			// 删除旧文档
+			await this.db.remove(doc);
+
+			new Notice("修改目录&重命名成功: " + new Date().toLocaleString());
 		} catch (error) {
-			console.error(error);
-			new Notice("文件重命名失败: " + new Date().toLocaleString());
+			console.error("修改目录&重命名失败:", error);
+			new Notice("修改目录&重命名失败: " + new Date().toLocaleString());
 		}
 	}
+
 
 	async pullData(): Promise<any[]> {
 		try {

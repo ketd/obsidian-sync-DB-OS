@@ -1,8 +1,8 @@
 export class Snowflake {
 	// 工作机器ID(0~1023)
-	private workerId: bigint;
+	private readonly workerId: bigint;
 	// 数据中心ID(0~1023)
-	private dataCenterId: bigint;
+	private readonly dataCenterId: bigint;
 	// 序列号(0~4095)
 	private sequence: bigint = BigInt(0);
 
