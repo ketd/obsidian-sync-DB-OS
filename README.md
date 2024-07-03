@@ -1,96 +1,77 @@
-# Obsidian Sample Plugin
+```markdown
+# Obsidian Sync Plugin
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+根据自己的一些需求，写了几个常用的同步功能：
 
-This project uses Typescript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in Typescript Definition format, which contains TSDoc comments describing what it does.
+- 本地图片自动上传图床，自动处理链接问题。效果大致为：`![[xxx.png]] --> ![[xxx.png]](https://xxxx.xxx.png/xxx.png)`
+- 手动对比冲突选择正确版本
+- 上传 PDF 等大文件到对象存储
 
-**Note:** The Obsidian API is still in early alpha and is subject to change at any time!
+原则上数据库中只保存文本文件，便于灵活修改；大文件在数据库中只存储 hash 值，通过对比 hash 来确定同名文件是否发生变动。
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+## 功能特性
 
-## First time developing plugins?
+- **本地图片自动上传图床**：在编辑笔记时，自动将本地图片上传到图床，并更新图片链接。
+- **冲突解决**：当笔记在多个设备上编辑时，支持手动对比冲突，选择正确的版本。
+- **大文件上传**：支持将 PDF 等大文件上传到对象存储，避免占用数据库空间。
 
-Quick starting guide for new plugin devs:
+## 数据库支持
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+|         | MongoDB | CouchDB |
+| ------- | :-----: | :-----: |
+| PC 端同步  |    √    |    √    |
+| 支持移动端 |    ×    |    √    |
 
-## Releasing new releases
+## 对象存储支持
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+|                   |  腾讯云  |  阿里云  |
+| ----------------- | :---: | :---: |
+| 是否脱离数据库           |   ×   |   ×   |
+| 保存多种数据格式          |   √   |   √   |
+| 支持本地图片<br>自动部署到图床 | <br>√ | <br>√ |
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+## 使用的库
 
-## Adding your plugin to the community plugin list
+- `cos-js-sdk-v5`
+- `crypto-js`
+- `diff`
+- `mongodb`
+- `pouchdb`
+- `sweetalert2`
 
-- Check https://github.com/obsidianmd/obsidian-releases/blob/master/plugin-review.md
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+## 如何安装
 
-## How to use
+1. 克隆此仓库到本地。
+   ```sh
+   git clone https://github.com/your-username/your-repo.git
+   ```
+2. 进入项目目录。
+   ```sh
+   cd your-repo
+   ```
+3. 安装依赖。
+   ```sh
+   npm install
+   ```
+4. 根据需要配置 `settings`。
+5. 运行插件。
 
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+## 使用方法
 
-## Manually installing the plugin
+1. **本地图片上传**：
+   - 在 Obsidian 中粘贴图片时，插件会自动将图片上传到指定的对象存储，并更新图片链接。
+   
+2. **冲突解决**：
+   - 当检测到笔记在多个设备上有冲突时，会弹出对比窗口，用户可以手动选择正确的版本。
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+3. **大文件上传**：
+   - 支持将大文件（如 PDF）上传到对象存储，并在数据库中保存文件的 hash 值，通过 hash 值来检测文件变动。
 
-## Improve code quality with eslint (optional)
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- To use eslint with this project, make sure to install eslint from terminal:
-  - `npm install -g eslint`
-- To use eslint to analyze this project use this command:
-  - `eslint main.ts`
-  - eslint will then create a report with suggestions for code improvement by file and line number.
-- If your source code is in a folder, such as `src`, you can use eslint with this command to analyze all files in that folder:
-  - `eslint .\src\`
+## 贡献
 
-## Funding URL
+欢迎提交 issue 或 pull request 来帮助我们改进这个项目。
 
-You can include funding URLs where people who use your plugin can financially support it.
+## 许可
 
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
-
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
+[MIT](LICENSE)
 ```
-
-If you have multiple URLs, you can also do:
-
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
-```
-
-## API Documentation
-
-See https://github.com/obsidianmd/obsidian-api
