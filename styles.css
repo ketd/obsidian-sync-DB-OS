@@ -75,3 +75,6 @@ If your plugin does not need CSS, delete this file.
 	margin-right: auto;
 }
 
+.swal-button {
+	color: black !important; /* 设置按钮文本颜色为黑色 */
+}

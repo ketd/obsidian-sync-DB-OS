@@ -1,5 +1,5 @@
 import COS from 'cos-js-sdk-v5';
-import {MyPluginSettings} from '../setting/MyPluginSettings';
+import {MyPluginSettings} from '../../setting/MyPluginSettings';
 
 export class TencentOSServer {
 	private cos: COS;

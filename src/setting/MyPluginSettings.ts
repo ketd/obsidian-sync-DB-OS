@@ -1,5 +1,5 @@
 import {PluginSettingTab, Setting, Notice, App, Platform} from 'obsidian';
-import {DatabaseFactory} from "../util/DatabaseFactory";
+import {DatabaseFactory} from "../util/db/DatabaseFactory";
 
 export interface MyPluginSettings {
 	//替换默认插入，直接使用图传

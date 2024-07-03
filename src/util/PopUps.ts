@@ -1,8 +1,8 @@
 import Swal from 'sweetalert2';
 import {App, TFile} from "obsidian";
 import {MyPluginSettings} from "../setting/MyPluginSettings";
-import {DatabaseFactory} from "./DatabaseFactory";
-import {TencentOSServer} from "./TencentOSServer";
+import {DatabaseFactory} from "./db/DatabaseFactory";
+import {TencentOSServer} from "./os/TencentOSServer";
 import {Util} from "./Util";
 
 export class PopUps {
@@ -55,7 +55,8 @@ export class PopUps {
 				const hash = await util.computeSampleHash(content)
 				await server.upsertDocument({
 					_id: filepath,
-					content: hash,
+					content: "",
+					hash : hash
 				})
 
 				const arrayBuffer = await adapter.readBinary(filepath);

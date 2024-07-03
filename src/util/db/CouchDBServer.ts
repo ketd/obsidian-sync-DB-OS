@@ -1,10 +1,15 @@
-import {MyPluginSettings} from '../setting/MyPluginSettings';
+import {MyPluginSettings} from '../../setting/MyPluginSettings';
 import {Notice} from "obsidian";
-import MarkdownDocument from "./MarkdownDocument";
-
+import MarkdownDocument from "../MarkdownDocument";
+import PouchDB from 'pouchdb-browser';
+import PouchDBFind from "pouchdb-find";
+PouchDB.plugin(PouchDBFind);
 
 export class CouchDBServer {
-	private PouchDB = require('pouchdb-browser');
+
+
+
+    // private db: PouchDB.Database;
 	private db: PouchDB.Database;
 
 	constructor(private settings: MyPluginSettings) {
@@ -28,7 +33,7 @@ export class CouchDBServer {
 		const fullURL = `http://${encodeURIComponent(username)}:${encodeURIComponent(password)}@${URL}:${port}/${databaseName}`;
 
 		try {
-			this.db = new this.PouchDB(fullURL);
+			this.db = new PouchDB(fullURL);
 			console.log('CouchDB 初始化成功');
 		} catch (error) {
 			console.error('Error initializing PouchDB instance:', error);
@@ -52,6 +57,7 @@ export class CouchDBServer {
 	// 创建或更新文档
 	public async upsertDocument(doc: MarkdownDocument): Promise<boolean> {
 		try {
+
 			const existingDoc = await this.db.get<MarkdownDocument>(doc._id);
 			console.log("existingDoc", existingDoc);
 			doc._rev = existingDoc._rev;
@@ -116,6 +122,30 @@ export class CouchDBServer {
 			throw error;
 		}
 	}
+
+	// 获取所有文档的hash
+	public async getAllDocumentHash(): Promise<MarkdownDocument[]> {
+		try {
+			// 创建索引
+			await this.db.createIndex({
+				index: {
+					fields: ['hash']
+				}
+			});
+
+			const result = await this.db.find({
+				selector: { _id: { $gte: null } },
+				fields: ['_id', 'hash']
+			});
+
+			console.log(result.docs);
+			return result.docs as MarkdownDocument[];
+		} catch (err) {
+			console.error(err);
+			throw err;
+		}
+	}
+
 
 	async updateDocumentPath(oldPath: string, newPath: string): Promise<void> {
 		try {

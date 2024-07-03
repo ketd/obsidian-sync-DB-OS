@@ -1,6 +1,6 @@
-import { MyPluginSettings } from '../setting/MyPluginSettings';
+import { MyPluginSettings } from '../../setting/MyPluginSettings';
 import { CouchDBServer } from './CouchDBServer';
-import MarkdownDocument from './MarkdownDocument';
+import MarkdownDocument from '../MarkdownDocument';
 import { Platform } from 'obsidian';
 
 interface IDatabaseServer {
@@ -10,6 +10,7 @@ interface IDatabaseServer {
 	getDocument(docId: string): Promise<MarkdownDocument | null>;
 	getAllDocumentIds(): Promise<string[]>;
 	updateDocumentPath(oldPath: string, newPath: string): Promise<void>;
+	getAllDocumentHash(): Promise<MarkdownDocument[]>;
 }
 
 export class DatabaseFactory {

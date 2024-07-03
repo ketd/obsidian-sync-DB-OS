@@ -1,8 +1,8 @@
 import * as mongoDB from 'mongodb';
 import {Collection, Db, MongoClient} from 'mongodb';
-import {MyPluginSettings} from "../setting/MyPluginSettings";
+import {MyPluginSettings} from "../../setting/MyPluginSettings";
 import {Notice} from "obsidian";
-import MarkdownDocument from "./MarkdownDocument";
+import MarkdownDocument from "../MarkdownDocument";
 
 
 
@@ -153,6 +153,9 @@ export class MongoDBServer {
 		}
 	}
 
+	public async getAllDocumentHash(): Promise<MarkdownDocument[]> {
+		return await this.getAllDocument();
+	}
 
 	async close(): Promise<void> {
 		if (this.client) {

@@ -1,11 +1,11 @@
 import { App, TFile, Notice } from 'obsidian';
-import { MongoDBServer } from '../util/MongoDBServer';
+import { MongoDBServer } from '../util/db/MongoDBServer';
 
 import { MyPluginSettings } from '../setting/MyPluginSettings';
 import {CompareFiles} from "../util/CompareFiles";
-import {DatabaseFactory} from "../util/DatabaseFactory";
+import {DatabaseFactory} from "../util/db/DatabaseFactory";
 import CryptoJS from "crypto-js";
-import {TencentOSServer} from "../util/TencentOSServer";
+import {TencentOSServer} from "../util/os/TencentOSServer";
 import {Util} from "../util/Util";
 
 export async function push(app: App, settings: MyPluginSettings, factory: DatabaseFactory) {
@@ -24,9 +24,11 @@ export async function push(app: App, settings: MyPluginSettings, factory: Databa
 				console.log('cloud not found,开始上传');
 				// 云端不存在，直接上传
 				const content = await app.vault.read(file);
+				const hash = await util.computeSampleHash(content);
 				await server.upsertDocument({
 					_id: documentId,
 					content: content,
+					hash: hash
 				});
 			} else {
 				// 云端存在，弹窗让用户处理冲突
@@ -50,6 +52,7 @@ export async function push(app: App, settings: MyPluginSettings, factory: Databa
 					_id: file.path,
 					content:hash,
 					fileType: "pdf",
+					hash:hash
 				});
 
 				if(success){
