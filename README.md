@@ -1,4 +1,4 @@
-```markdown
+Markdown
 # Obsidian Sync Plugin
 
 根据自己的一些需求，写了几个常用的同步功能：
@@ -74,4 +74,4 @@
 ## 许可
 
 [MIT](LICENSE)
-```
+
