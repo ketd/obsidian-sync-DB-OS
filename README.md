@@ -69,6 +69,15 @@ Markdown
 3. **大文件上传**：
    - 支持将大文件（如 PDF）上传到对象存储，并在数据库中保存文件的 hash 值，通过 hash 值来检测文件变动。
 
+
+## 配置
+### 数据库
+![image](https://github.com/ketd/obsidian-sync-DB-OS/assets/94940923/24305e0a-c6ee-421c-a151-4b5f1eba5ad8)
+
+### 对象存储
+![image](https://github.com/ketd/obsidian-sync-DB-OS/assets/94940923/b9b1153e-12b4-45ed-8141-ddcd314a0039)
+
+
 ## 贡献
 
 欢迎提交 issue 或 pull request 来帮助我们改进这个项目。
