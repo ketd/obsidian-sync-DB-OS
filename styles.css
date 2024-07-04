@@ -78,3 +78,27 @@ If your plugin does not need CSS, delete this file.
 .swal-button {
 	color: black !important; /* 设置按钮文本颜色为黑色 */
 }
+
+
+/* styles.css */
+.button-container {
+	display: flex;
+	justify-content: center;
+	gap: 35px; /* 调整按钮之间的间距 */
+}
+
+.custom-setting-item {
+	display: flex !important;
+	justify-content: center !important;
+	align-items: center !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	background: none !important;
+	border: none !important;
+}
+
+.confirm-button, .cancel-button {
+	flex: none; /* 确保按钮不会拉伸 */
+	width: 100px; /* 根据需要调整按钮宽度 */
+}
+

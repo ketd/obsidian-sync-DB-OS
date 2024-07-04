@@ -1,11 +1,11 @@
-import {App, Editor, MarkdownFileInfo, MarkdownView, TAbstractFile, TFile} from "obsidian";
-import {MyPluginSettings} from "../setting/MyPluginSettings";
+import {App, Editor, MarkdownFileInfo, MarkdownView, Notice, TAbstractFile, TFile} from "obsidian";
 import {DatabaseFactory} from "./db/DatabaseFactory";
 import {TencentOSServer} from "./os/TencentOSServer";
 import {Util} from "./Util";
 import {Snowflake} from "./Snowflake";
 import {CompareFiles} from "./CompareFiles";
-import {PopUps} from "./PopUps";
+import {ConfirmModal} from "../modal/ConfirmModal";
+import {MyPluginSettings} from "../setting/SettingsData";
 
 export class Handler {
 	app: App;
@@ -164,13 +164,17 @@ export class Handler {
 		if (file && file.extension === 'md') {
 			const server = await this.factory.getServer();
 
-			const result = await server.getDocument(file.path);
-			if (result) {
+			const hash = await server.getDocumentHash(file.path);
+			if (hash) {
 				const fileContent = await this.app.vault.read(file);
-				if (fileContent !== result.content) {
+				const localFileHash = await this.util.computeSampleHash(fileContent)
+				if (localFileHash !== hash) {
 					// 你可以在这里添加你的逻辑，比如提示用户同步差异，或者自动同步
 					const compareFile = new CompareFiles()
-					await compareFile.showComparisonPopup(this.app, this.settings, file, fileContent, result);
+					const cloudContent = await server.getDocument(file.path);
+					if (cloudContent) {
+						await compareFile.showComparisonPopup(this.app, this.settings, file, fileContent, cloudContent);
+					}
 				} else {
 					console.log(`本地内容和云内容相同${file.path}`);
 				}
@@ -190,8 +194,73 @@ export class Handler {
 
 				if (result.content !== hash) {
 
-					const popUps = new PopUps();
-					popUps.showPdfConflict(file, this.app, this.settings, this.factory);
+					const filepath = file.path
+
+					new ConfirmModal(
+						this.app,
+						'与云端同名pdf文件内容不同',
+						undefined, // 如果没有 HTML 可以传入 undefined
+						undefined,
+						undefined,
+						{
+							text: '重命名此pdf为副本，并且将此pdf上传至云端，同时下载云端同名pdf', onClick: async () => {
+								try {
+									this.tencentOSServer.downFileToOS(filepath + '_副本.pdf').then(async r => {
+
+
+										await this.util.SaveFileToLocally(this.app, filepath, r)
+
+
+										this.app.vault.adapter.rename(filepath, filepath + '_副本.pdf').then(r => {
+
+										})
+									}).catch(e => {
+
+									}).finally(async () => {
+
+									})
+
+
+								} catch (e) {
+									console.log(e)
+								}
+								new Notice('本地文件已被云端文件覆盖');
+							}
+						},
+						{
+							text: '覆盖云端pdf', onClick: async () => {
+								const server = await this.factory.getServer();
+								const content = await this.app.vault.read(file);
+								const hash = await this.util.computeSampleHash(content)
+								await server.upsertDocument({
+									_id: filepath,
+									content: "",
+									hash: hash
+								})
+
+								const arrayBuffer = await this.app.vault.adapter.readBinary(filepath);
+
+								// 将 ArrayBuffer 转换为 Blob，然后创建一个新的 File 对象
+								const blob = new Blob([arrayBuffer], {type: 'application/pdf'});
+								const newFile = new File([blob], file.name, {
+									type: 'application/pdf',
+									lastModified: new Date().getTime()
+								});
+								await this.tencentOSServer.deleteFileToOS(filepath).then(async r => {
+									await this.tencentOSServer.uploadFileToOS(newFile, filepath).then(async r => {
+
+									})
+								}).catch(e => {
+
+								}).finally(async () => {
+								});
+								new Notice('云端文件已被本地文件覆盖');
+							}
+						},
+					).open();
+
+
+					/*popUps.showPdfConflict(file, this.app, this.settings, this.factory);*/
 				}
 			}
 		}
@@ -200,13 +269,21 @@ export class Handler {
 	}
 
 	async RenameHandler(file: TAbstractFile, oldPath: string) {
-		const server = await this.factory.getServer();
+		try {
+			const server = await this.factory.getServer();
 
-		// 判断文件类型
-		if (file instanceof TFile&&file.extension==='md'|| file instanceof TFile&&file.extension==='pdf') {
-			const newPath = file.path;
-			await server.updateDocumentPath(oldPath, newPath);
+			// 判断文件类型
+			if (file instanceof TFile && file.extension === 'md' || file instanceof TFile && file.extension === 'pdf') {
+				const newPath = file.path;
+				await server.updateDocumentPath(oldPath, newPath);
+			}
+		} catch (e) {
+			if (e.status != 404) {
+				new Notice("修改目录&重命名失败: " + new Date().toLocaleString());
+			}
 		}
+
+
 	}
 
 

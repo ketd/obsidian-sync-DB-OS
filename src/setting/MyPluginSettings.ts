@@ -1,90 +1,6 @@
 import {PluginSettingTab, Setting, Notice, App, Platform} from 'obsidian';
 import {DatabaseFactory} from "../util/db/DatabaseFactory";
 
-export interface MyPluginSettings {
-	//替换默认插入，直接使用图传
-	ReplacesTheDefaultInsert: boolean;
-	ObjectStorageProvider: string;
-	DatabaseType: string;
-	// 插件设置
-	//腾讯云
-	SecretIdByTencent: string;
-	SecretKeyByTencent: string;
-	BucketByTencent: string;
-	RegionByTencent: string;
-	//阿里云
-	SecretIdByAliyun: string;
-	SecretKeyByAliyun: string;
-	BucketByAliyun: string;
-	RegionByAliyun: string;
-
-	//CouchDB
-	URLByCouchDB: string;
-	PortByCouchDB: string;
-	USerNameByCouchDB: string;
-	PasswordByCouchDB: string;
-	DateBaseNameByCouchDB: string;
-
-	//MongoDB
-	IsUpdateDoc:boolean;
-
-	URLByMongoDB: string;
-	PortByMongoDB: string;
-	USerNameByMongoDB: string;
-	PasswordByMongoDB: string;
-	DateBaseNameByMongoDB: string;
-	CollectionName:string;
-	Throttling:number;
-	SyncInterval:number;
-
-	//是否保存到本地
-	IsSaveLocally: boolean;
-	IsCreateSubfolders :boolean
-	SubfoldersName:string
-
-	//其他设置
-	//NeverDeleteLocal
-
-
-}
-
-export const DEFAULT_SETTINGS: MyPluginSettings = {
-
-	ReplacesTheDefaultInsert: false,
-	ObjectStorageProvider: 'tencent',
-	DatabaseType:'CouchDB',
-	SecretIdByTencent: '',
-	SecretKeyByTencent: '',
-	BucketByTencent: '',
-	RegionByTencent: '',
-	SecretIdByAliyun: '',
-	SecretKeyByAliyun: '',
-	BucketByAliyun: '',
-	RegionByAliyun: '',
-
-	URLByCouchDB: '',
-	PortByCouchDB:'5984',
-	USerNameByCouchDB: '',
-	PasswordByCouchDB: '',
-	DateBaseNameByCouchDB: '',
-
-	IsUpdateDoc:false,
-
-	URLByMongoDB: '',
-	PortByMongoDB: '27017',
-    USerNameByMongoDB: '',
-    PasswordByMongoDB: '',
-    DateBaseNameByMongoDB: '',
-	CollectionName:'',
-	Throttling:300,
-	SyncInterval: 300, // 默认同步间隔为 300 秒 (5 分钟)
-
-	IsSaveLocally: true,
-	IsCreateSubfolders:true,
-	SubfoldersName:'img'
-
-}
-
 
 export class SampleSettingTab extends PluginSettingTab {
 	plugin: any;
@@ -286,6 +202,28 @@ export class SampleSettingTab extends PluginSettingTab {
 		} else if (this.plugin.settings.DatabaseType === 'CouchDB') {
 			this.displayCouchDBSettings(containerEl);
 		}
+		new Setting(containerEl)
+            .setName('是否自动保存')
+            .setDesc('开启自动保存')
+            .addToggle(toggle => {
+                toggle
+                    .setValue(this.plugin.settings.IsAutoSave)
+                    .onChange(async (value) => {
+                        this.plugin.settings.IsAutoSave = value;
+                        this.display(); //
+                    });
+            });
+		new Setting(containerEl)
+			.setName('创建新文件自动上传')
+			.setDesc('创建新文件自动上传')
+			.addToggle(toggle => {
+				toggle
+					.setValue(this.plugin.settings.AutomaticallyUploadedOnCreation)
+					.onChange(async (value) => {
+						this.plugin.settings.AutomaticallyUploadedOnCreation = value;
+						this.display(); //
+					});
+			});
 	}
 
 	displayMongoDBSettings(containerEl: HTMLElement): void {

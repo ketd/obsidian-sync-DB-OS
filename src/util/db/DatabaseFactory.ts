@@ -1,13 +1,14 @@
-import { MyPluginSettings } from '../../setting/MyPluginSettings';
 import { CouchDBServer } from './CouchDBServer';
 import MarkdownDocument from '../MarkdownDocument';
 import { Platform } from 'obsidian';
+import {MyPluginSettings} from "../../setting/SettingsData";
 
 interface IDatabaseServer {
 	testConnection(): Promise<boolean>;
 	upsertDocument(doc: MarkdownDocument): Promise<boolean>;
 	deleteDocument(docId: string): Promise<void>;
 	getDocument(docId: string): Promise<MarkdownDocument | null>;
+	getDocumentHash(docId: string): Promise<string | null>;
 	getAllDocumentIds(): Promise<string[]>;
 	updateDocumentPath(oldPath: string, newPath: string): Promise<void>;
 	getAllDocumentHash(): Promise<MarkdownDocument[]>;

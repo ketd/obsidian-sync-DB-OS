@@ -1,10 +1,10 @@
 import {App, Notice, TFile} from "obsidian";
-import {MyPluginSettings} from "../setting/MyPluginSettings";
 import {MongoDBServer} from "../util/db/MongoDBServer";
 import {CompareFiles} from "../util/CompareFiles";
 import {DatabaseFactory} from "../util/db/DatabaseFactory";
 import MarkdownDocument from "../util/MarkdownDocument";
 import {Util} from "../util/Util";
+import {MyPluginSettings} from "../setting/SettingsData";
 
 export async function manualSyncing(env: MouseEvent, app: App, settings: MyPluginSettings, factory: DatabaseFactory) {
 	try {

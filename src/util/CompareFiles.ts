@@ -1,9 +1,10 @@
 import { App, Notice, TFile } from 'obsidian';
 import swal from 'sweetalert';
-import { MyPluginSettings } from '../setting/MyPluginSettings';
 import { DatabaseFactory } from "./db/DatabaseFactory";
 import MarkdownDocument from "./MarkdownDocument";
 import { Util } from "./Util";
+import {ConfirmModal} from "../modal/ConfirmModal";
+import {MyPluginSettings} from "../setting/SettingsData";
 
 export class CompareFiles {
 	async showComparisonPopup(app: App, settings: MyPluginSettings, file: TFile, localContent: string, cloudResult: MarkdownDocument) {
@@ -35,7 +36,32 @@ export class CompareFiles {
 
 		comparisonHTML += '</div></div></div>';
 
-		return new Promise<void>((resolve, reject) => {
+
+		new ConfirmModal(
+			app,
+			'与云端文件内容对比',
+			comparisonHTML, // 如果没有 HTML 可以传入 undefined
+			800, // 如果没有 HTML 可以传入 undefined
+			1200,
+			{
+				text: '拉取云端', onClick: async () => {
+					await app.vault.modify(file, cloudResult.content);
+					new Notice('本地文件已被云端文件覆盖');
+				}
+			},
+			{text: '覆盖云端', onClick: async () => {
+					const factory = new DatabaseFactory(settings);
+					const hash = await util.computeSampleHash(localContent);
+					await (await factory.getServer()).upsertDocument({
+						_id: file.path,
+						content: localContent,
+						hash: hash
+					});
+					new Notice('云端文件已被本地文件覆盖');
+				}},
+		).open();
+
+	/*	return new Promise<void>((resolve, reject) => {
 			swal("与云端文件内容对比", {
 				content: {
 					element: 'div',
@@ -76,49 +102,9 @@ export class CompareFiles {
 							new Notice('云端文件已被本地文件覆盖');
 							break;
 
-						/*default:
-							await swal("Got away safely!");*/
+
 					}
 				});
-			/*swal({
-				title: '文件内容对比',
-				content: {
-					element: 'div',
-					attributes: {
-						innerHTML: comparisonHTML
-					}
-				},
-				buttons: {
-					cancel: {
-						text: '拉取云端文件',
-						value: 'pull'
-					},
-					confirm: {
-						text: '使用本地文件覆盖云端',
-						value: 'useLocal'
-					}
-				}
-			}).then(async (value) => {
-				if (value === 'useLocal') {
-					// Use local file to overwrite cloud
-					const factory = new DatabaseFactory(settings);
-					const hash = await util.computeSampleHash(localContent);
-					await (await factory.getServer()).upsertDocument({
-						_id: file.path,
-						content: localContent,
-						hash: hash
-					});
-					new Notice('云端文件已被本地文件覆盖');
-				} else if (value === 'pull') {
-					// Pull cloud file to local
-					await app.vault.modify(file, cloudResult.content);
-					new Notice('本地文件已被云端文件覆盖');
-				}
-				resolve();
-			}).catch(err => {
-				console.error('Error showing comparison popup:', err);
-				reject(err);
-			});*/
-		});
+		});*/
 	}
 }

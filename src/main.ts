@@ -8,7 +8,7 @@ import {
 	Plugin, TAbstractFile,
 	TFile,
 } from 'obsidian';
-import {DEFAULT_SETTINGS, MyPluginSettings, SampleSettingTab} from './setting/MyPluginSettings';
+import { SampleSettingTab} from './setting/MyPluginSettings';
 import {manualSyncing} from "./sync/ManualSyncing";
 import {pull} from "./sync/Pull";
 import {push} from "./sync/Push";
@@ -17,6 +17,9 @@ import {TencentOSServer} from "./util/os/TencentOSServer";
 import {Util} from "./util/Util";
 import {Handler} from "./util/Handler";
 import swal from 'sweetalert';
+import {ConfirmModal} from "./modal/ConfirmModal";
+import {MultiSelectModal} from "./modal/MultiSelectModal";
+import {DEFAULT_SETTINGS, MyPluginSettings} from "./setting/SettingsData";
 
 export default class MyPlugin extends Plugin {
 	settings: MyPluginSettings;
@@ -35,8 +38,9 @@ export default class MyPlugin extends Plugin {
 		this.registerEvent(
 			this.app.vault.on('create', async (file) => {
 
-				await handler.CreateHandler(file, this.isPulling)
-
+				if(this.settings.AutomaticallyUploadedOnCreation){
+					await handler.CreateHandler(file, this.isPulling)
+				}
 			})
 		);
 
@@ -49,7 +53,9 @@ export default class MyPlugin extends Plugin {
 
 		this.registerEvent(
 			this.app.workspace.on('editor-change', async (editor: Editor, info: MarkdownView | MarkdownFileInfo) => {
-				await handler.EditorChangeHandler(editor, info);
+				if(this.settings.IsAutoSave){
+					await handler.EditorChangeHandler(editor, info);
+				}
 			})
 		);
 
@@ -76,63 +82,45 @@ export default class MyPlugin extends Plugin {
 
 		const replacementIconEl = this.addRibbonIcon('replace', '替换为图床', async (evt: MouseEvent) => {
 
-			const activeFile = this.app.workspace.getActiveFile()
-			if (!activeFile) {
-				new Notice('请打开一个文件');
-			} else {
-				return new Promise<void>((resolve, reject) => {
-					swal({
-						title: "是否确定?",
-						text: "这将把你md文档中的连接本地图片全部替换为网络图片",
-						icon: "warning",
-						buttons: {
-							cancel: {
-								text: "取消",
-								value: false,
-								visible: true,
-								closeModal: true,
-							},
-							confirm: {
-								text: "确认",
-								value: true,
-								closeModal: true,
-							},
-						},
-						dangerMode: true,
-					})
-						.then(async (willDelete) => {
-							if (willDelete) {
-								const success = await this.util.replaceLocalImagesWithCloudUrls(activeFile,this.app, this.settings, this.tencentOSServer);
-								if (success) {
-									await swal("替换成功", {
-										icon: "success",
-									});
-								} else {
-									await swal("替换失败", {
-										icon: "error",
-									});
-								}
-							}
-						});
-				})
-			}
+
+				new ConfirmModal(
+					this.app,
+					'这将把你md文档中的连接本地图片全部替换为网络图片',
+					undefined, // 如果没有 HTML 可以传入 undefined
+					undefined,
+					undefined,
+					{
+						text: '替换当前文件夹', onClick: async () => {
+							await this.util.replaceLocalImagesWithCloudUrls(this.app,false, this.tencentOSServer);
+						}
+					},
+					{
+						text: '替换全部', onClick: async () => {
+							await this.util.replaceLocalImagesWithCloudUrls(this.app,true, this.tencentOSServer);
+						}
+					},
+					{
+						text: '取消', onClick: () => console.log('取消按钮被点击')
+					},
+				).open();
 
 		});
+
+
+		const statusBarItem = this.addStatusBarItem();
 
 
 		// 这将在左侧功能区中创建一个图标。
 		const pushIconEl = this.addRibbonIcon('arrow-up-from-line', '推送所有笔记', async (evt: MouseEvent) => {
 			// 在用户单击图标时调用。
-			await push(this.app, this.settings, this.factory);
-
-			new Notice('提交成功!');
+			await push(this.app, this.settings, this.factory,statusBarItem);
 		});
 
 
 		const pullIconEl = this.addRibbonIcon('git-pull-request', '拉取云端', async (evt: MouseEvent) => {
 			this.isPulling = true; // 开始拉取操作前设置标志
 			try {
-				await pull(this.app, this.factory, this.tencentOSServer);
+				await pull(this.app, this.factory, this.tencentOSServer,statusBarItem);
 
 				new Notice('拉取云端成功!');
 			} catch (error) {

@@ -1,10 +1,9 @@
 import * as mongoDB from 'mongodb';
 import {Collection, Db, MongoClient} from 'mongodb';
-import {MyPluginSettings} from "../../setting/MyPluginSettings";
+
 import {Notice} from "obsidian";
 import MarkdownDocument from "../MarkdownDocument";
-
-
+import {MyPluginSettings} from "../../setting/SettingsData";
 
 
 export class MongoDBServer {
@@ -145,7 +144,9 @@ export class MongoDBServer {
 
 	public async deleteDocument(docId: string): Promise<void> {
 		try {
-			await this.collection!.deleteOne({ _id: docId });
+			await this.connectToDatabase();
+			if (!this.collection) throw new Error('Collection is not initialized');
+			await this.collection.deleteOne({ _id: docId });
 			new Notice('文档删除成功');
 		} catch (error) {
 			console.error('文档删除失败:', error);
@@ -153,8 +154,37 @@ export class MongoDBServer {
 		}
 	}
 
+	public async getDocumentHash(_id: string): Promise<string> {
+		await this.connectToDatabase();
+		if (!this.collection) throw new Error('Collection is not initialized');
+
+		// 使用 findOne() 方法，第一个参数为查询条件，第二个参数为投影对象
+		const document = await this.collection.findOne({ _id: _id }, { projection: { hash: 1 } });
+
+		if (!document) throw new Error('Document not found');
+
+		// 返回查询到的 hash 字段
+		return document.hash;
+	}
+
+
 	public async getAllDocumentHash(): Promise<MarkdownDocument[]> {
-		return await this.getAllDocument();
+		await this.connectToDatabase();
+		if (!this.collection) throw new Error('Collection is not initialized');
+		// 查询所有文档，并只返回 _id 和 hash 字段
+		const documents = await this.collection.find({}, { projection: { _id: 1, hash: 1 } }).toArray();
+
+		// 将查询结果映射为 MarkdownDocument 对象数组
+		return documents.map(doc => ({
+			_id: doc._id.toString(), // 将 ObjectId 转换为字符串
+			content: '', // 如果需要 content，可以根据需要添加
+			hash: doc.hash,
+			fileType: '', // 如果需要 fileType，可以根据需要添加
+			_rev: '' // 如果需要 _rev，可以根据需要添加
+		}));
+
+
+
 	}
 
 	async close(): Promise<void> {

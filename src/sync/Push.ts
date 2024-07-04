@@ -1,19 +1,72 @@
 import { App, TFile, Notice } from 'obsidian';
 import { MongoDBServer } from '../util/db/MongoDBServer';
 
-import { MyPluginSettings } from '../setting/MyPluginSettings';
 import {CompareFiles} from "../util/CompareFiles";
 import {DatabaseFactory} from "../util/db/DatabaseFactory";
 import CryptoJS from "crypto-js";
 import {TencentOSServer} from "../util/os/TencentOSServer";
 import {Util} from "../util/Util";
+import {MultiSelectModal} from "../modal/MultiSelectModal";
+import {MyPluginSettings} from "../setting/SettingsData";
 
-export async function push(app: App, settings: MyPluginSettings, factory: DatabaseFactory) {
+export async function push(app: App, settings: MyPluginSettings, factory: DatabaseFactory, statusBarItem: HTMLElement) {
 	const files = app.vault.getFiles();
 	const server = await factory.getServer();
 	const util = new Util()
 
+
+	let isUpdatedFiles: TFile[] = [];
+	const markdownDocumentHash = await server.getAllDocumentHash();
+	const markdownDocumentIds = await  server.getAllDocumentIds()
 	for (const file of files) {
+		if(file.extension == 'md'){
+			const content = await app.vault.read(file);
+			const hash = await util.computeSampleHash(content);
+			const markdownDocument = markdownDocumentHash.find(doc => doc.hash === hash);
+			if(!markdownDocument){
+				isUpdatedFiles.push(file);
+			}
+		}
+
+	}
+
+	let selectedFiles: TFile[] = [];
+
+	new MultiSelectModal(
+		this.app,
+		"您对以下内容做出了修改",
+		isUpdatedFiles,
+		(result) => {
+			selectedFiles=result
+		},
+		{
+			text: '确认推送', onClick: async () => {
+				try{
+					for(const file of selectedFiles){
+
+						const content = await app.vault.read(file);
+						const hash = await util.computeSampleHash(content);
+						await server.upsertDocument({
+							_id: file.path,
+							content: content,
+							hash: hash
+						});
+					}
+					new Notice('全部笔记已推送完成!');
+				}catch (e) {
+					new Notice('笔记推送失败!!!'+e);
+				}
+
+			}
+		},
+		{
+			text: '取消', onClick: async () => {
+
+			}
+		}
+	).open()
+
+	/*for (const file of files) {
 		if (file.extension === 'md') {
 			const documentId = file.path;
 
@@ -73,7 +126,7 @@ export async function push(app: App, settings: MyPluginSettings, factory: Databa
 				// Handle error if needed
 			}
 		}
-	}
+	}*/
 
-	new Notice('全部笔记已推送完成!');
+
 }

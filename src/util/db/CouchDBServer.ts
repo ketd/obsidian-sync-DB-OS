@@ -1,8 +1,9 @@
-import {MyPluginSettings} from '../../setting/MyPluginSettings';
 import {Notice} from "obsidian";
 import MarkdownDocument from "../MarkdownDocument";
 import PouchDB from 'pouchdb-browser';
 import PouchDBFind from "pouchdb-find";
+import {MyPluginSettings} from "../../setting/SettingsData";
+
 PouchDB.plugin(PouchDBFind);
 
 export class CouchDBServer {
@@ -111,17 +112,36 @@ export class CouchDBServer {
 		}
 	}
 
-	// 获取所有文档的 ID
+	// 获取所有文档的 ID，过滤掉设计文档
 	public async getAllDocumentIds(): Promise<string[]> {
 		try {
-			const allDocs = await this.db.allDocs();
-			return allDocs.rows.map(row => row.id);
+			const allDocs = await this.db.allDocs({ include_docs: false });
+			// 过滤掉以 '_design/' 开头的文档
+			return allDocs.rows
+				.filter(row => !row.id.startsWith('_design/'))
+				.map(row => row.id);
 		} catch (error) {
 			console.error('获取所有文档ID失败:', error);
 			new Notice('获取所有文档ID失败');
 			throw error;
 		}
 	}
+
+	public async getDocumentHash(_id: string): Promise<string> {
+		try {
+			const result = await this.db.query('docs/hash', {
+				key: _id,
+				include_docs: false // 不包含完整的文档内容，只返回视图映射函数中的值
+			});
+
+			return result.rows[0].value;
+		} catch (error) {
+			console.error('获取文档hash字段失败:', error);
+			throw error;
+		}
+	}
+
+
 
 	// 获取所有文档的hash
 	public async getAllDocumentHash(): Promise<MarkdownDocument[]> {
@@ -178,7 +198,7 @@ export class CouchDBServer {
 			new Notice("修改目录&重命名成功: " + new Date().toLocaleString());
 		} catch (error) {
 			console.error("修改目录&重命名失败:", error);
-			new Notice("修改目录&重命名失败: " + new Date().toLocaleString());
+			//new Notice("修改目录&重命名失败: " + new Date().toLocaleString());
 		}
 	}
 
