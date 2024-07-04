@@ -1,11 +1,11 @@
-Markdown
 # obsidian-sync-DB-OS
 
 根据自己的一些需求，写了几个常用的同步功能：
 
 - 在 Obsidian 中粘贴图片时，插件会自动将图片上传到指定的对象存储，并更新图片链接
 - 支持将以插入的本地图片链接转换为图床地址
-  效果大致为：`![[xxx.png]] --> ![[xxx.png]](https://xxxx.xxx.os/xxx.png)`
+  效果大致为：
+  `![[xxx.png]] --> ![[xxx.png]](https://xxxx.xxx.os/xxx.png)`
 - 手动对比冲突选择正确版本
 - 上传 PDF 等大文件到对象存储
 
