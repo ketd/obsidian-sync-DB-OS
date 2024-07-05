@@ -139,7 +139,7 @@ export default class MyPlugin extends Plugin {
 		const statusBarItemEl = this.addStatusBarItem();
 		statusBarItemEl.setText('Status Bar Text');
 
-		// 这添加了一个可以在任何地方触发的简单命令
+		/*// 这添加了一个可以在任何地方触发的简单命令
 		this.addCommand({
 			id: 'open-sample-modal-simple',
 			name: 'Open sample modal (simple)',
@@ -183,7 +183,7 @@ export default class MyPlugin extends Plugin {
 		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
 
 		});
-
+*/
 		// 注册间隔时，该功能会在插件禁用时自动清除间隔。
 		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
 	}
@@ -202,20 +202,4 @@ export default class MyPlugin extends Plugin {
 	}
 
 
-}
-
-class SampleModal extends Modal {
-	constructor(app: App) {
-		super(app);
-	}
-
-	onOpen() {
-		const {contentEl} = this;
-		contentEl.setText('Woah!');
-	}
-
-	onClose() {
-		const {contentEl} = this;
-		contentEl.empty();
-	}
 }
