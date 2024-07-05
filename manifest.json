@@ -1,9 +1,9 @@
 {
-	"id": "obsidian-sync-db-os",
-	"name": "同步插件cos",
+	"id": "sync-db-os",
+	"name": "sync-db-os",
 	"version": "1.0.2",
-	"minAppVersion": "0.15.0",
-	"description": "这是一个用于同步的插件",
+	"minAppVersion": "1.0.0",
+	"description": "For synchronization between multiple platforms",
 	"author": "ketd",
 	"repo":"https://github.com/ketd/obsidian-sync-DB-OS",
 	"isDesktopOnly": false
