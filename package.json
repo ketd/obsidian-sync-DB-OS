@@ -1,7 +1,7 @@
 {
-	"name": "obsidian-sync4-db-os",
+	"name": "obsidian-sync-db-os",
 	"version": "1.0.0",
-	"description": "这是一个用于同步的插件",
+	"description": "For synchronization between multiple platforms",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
