@@ -5,6 +5,6 @@
 	"minAppVersion": "1.0.0",
 	"description": "For synchronization between multiple platforms",
 	"author": "ketd",
-	"repo":"https://github.com/ketd/obsidian-sync-DB-OS",
+	"repo":"ketd/obsidian-sync-DB-OS",
 	"isDesktopOnly": false
 }
