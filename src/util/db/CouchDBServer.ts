@@ -153,18 +153,31 @@ export class CouchDBServer {
 				}
 			});
 
-			const result = await this.db.find({
-				selector: { _id: { $gte: null } },
-				fields: ['_id', 'hash']
-			});
+			let result;
+			let allDocs: MarkdownDocument[] = [];
+			let skip = 0;
+			const limit = 100; // 每次查询的文档数量
 
-			console.log(result.docs);
-			return result.docs as MarkdownDocument[];
+			do {
+				result = await this.db.find({
+					selector: { _id: { $gte: null } },
+					fields: ['_id', 'hash'],
+					limit: limit,
+					skip: skip
+				});
+
+				allDocs = allDocs.concat(result.docs as MarkdownDocument[]);
+				skip += limit;
+			} while (result.docs.length === limit);
+
+			console.log(allDocs);
+			return allDocs;
 		} catch (err) {
 			console.error(err);
 			throw err;
 		}
 	}
+
 
 
 	async updateDocumentPath(oldPath: string, newPath: string): Promise<void> {

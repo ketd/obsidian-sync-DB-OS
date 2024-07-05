@@ -1,5 +1,5 @@
 {
-	"name": "obsidian-sync4_couchdb-os",
+	"name": "obsidian-sync4-db-os",
 	"version": "1.0.0",
 	"description": "这是一个用于同步的插件",
 	"main": "main.js",
