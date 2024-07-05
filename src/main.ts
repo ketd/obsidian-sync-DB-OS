@@ -133,7 +133,7 @@ export default class MyPlugin extends Plugin {
 
 
 		// 使用功能区执行其他操作
-		ribbonIconEl.addClass('my-plugin-ribbon-class');
+		//ribbonIconEl.addClass('my-plugin-ribbon-class');
 
 		// 这会在应用底部添加一个状态栏项。不适用于移动应用程序。
 		const statusBarItemEl = this.addStatusBarItem();
@@ -185,7 +185,7 @@ export default class MyPlugin extends Plugin {
 		});
 */
 		// 注册间隔时，该功能会在插件禁用时自动清除间隔。
-		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
+		//this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
 	}
 
 
