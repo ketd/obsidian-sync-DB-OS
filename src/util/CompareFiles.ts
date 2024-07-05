@@ -3,8 +3,8 @@ import swal from 'sweetalert';
 import { DatabaseFactory } from "./db/DatabaseFactory";
 import MarkdownDocument from "./MarkdownDocument";
 import { Util } from "./Util";
-import {ConfirmModal} from "../modal/ConfirmModal";
-import {MyPluginSettings} from "../setting/SettingsData";
+import { ConfirmModal } from "../modal/ConfirmModal";
+import { MyPluginSettings } from "../setting/SettingsData";
 
 export class CompareFiles {
 	async showComparisonPopup(app: App, settings: MyPluginSettings, file: TFile, localContent: string, cloudResult: MarkdownDocument) {
@@ -13,43 +13,71 @@ export class CompareFiles {
 
 		const diffResult = diff.diffLines(localContent, cloudResult.content);
 
-		let comparisonHTML = '<div style="display: flex;">';
-		comparisonHTML += '<div style="width: 50%; padding-right: 10px;"><h3>本地文件</h3>';
-		comparisonHTML += '<div style="padding: 10px;">';
+		const comparisonContainer = document.createElement('div');
+		comparisonContainer.style.display = 'flex';
+		comparisonContainer.style.width = '100%'; // Ensure the container takes up the full width
+
+		const localFileDiv = document.createElement('div');
+		localFileDiv.style.flex = '1'; // Use flex to allow the divs to grow and shrink within the container
+		localFileDiv.style.paddingRight = '10px';
+
+		const localFileHeader = document.createElement('h3');
+		localFileHeader.textContent = '本地文件';
+		localFileDiv.appendChild(localFileHeader);
+
+		const localFileContent = document.createElement('div');
+		localFileContent.style.padding = '10px';
 
 		diffResult.forEach((part: any) => {
 			const color = part.added ? 'green' : part.removed ? 'red' : 'black';
-			comparisonHTML += `<div style="color: ${color};">${part.value}</div>`;
+			const partDiv = document.createElement('div');
+			partDiv.style.color = color;
+			partDiv.textContent = part.value;
+			localFileContent.appendChild(partDiv);
 		});
 
-		comparisonHTML += '</div></div>';
-		comparisonHTML += '<div style="width: 50%; padding-left: 10px;"><h3>云端文件</h3>';
-		comparisonHTML += '<div style="padding: 10px;">';
+		localFileDiv.appendChild(localFileContent);
+		comparisonContainer.appendChild(localFileDiv);
+
+		const cloudFileDiv = document.createElement('div');
+		cloudFileDiv.style.flex = '1'; // Use flex to allow the divs to grow and shrink within the container
+		cloudFileDiv.style.paddingLeft = '10px';
+
+		const cloudFileHeader = document.createElement('h3');
+		cloudFileHeader.textContent = '云端文件';
+		cloudFileDiv.appendChild(cloudFileHeader);
+
+		const cloudFileContent = document.createElement('div');
+		cloudFileContent.style.padding = '10px';
 
 		// Only show non-removed parts in cloud file
 		diffResult.forEach((part: any) => {
-			const color = part.added ? 'green' : part.removed ? 'red' : 'black';
 			if (!part.removed) {
-				comparisonHTML += `<div style="color: ${color};">${part.value}</div>`;
+				const color = part.added ? 'green' : 'black';
+				const partDiv = document.createElement('div');
+				partDiv.style.color = color;
+				partDiv.textContent = part.value;
+				cloudFileContent.appendChild(partDiv);
 			}
 		});
 
-		comparisonHTML += '</div></div></div>';
-
+		cloudFileDiv.appendChild(cloudFileContent);
+		comparisonContainer.appendChild(cloudFileDiv);
 
 		new ConfirmModal(
 			app,
 			'与云端文件内容对比',
-			comparisonHTML, // 如果没有 HTML 可以传入 undefined
-			800, // 如果没有 HTML 可以传入 undefined
+			comparisonContainer.outerHTML, // Use outerHTML for passing constructed HTML
 			1200,
+			800,
 			{
 				text: '拉取云端', onClick: async () => {
 					await app.vault.modify(file, cloudResult.content);
 					new Notice('本地文件已被云端文件覆盖');
 				}
 			},
-			{text: '覆盖云端', onClick: async () => {
+			{
+				text: '覆盖云端', onClick: async () => {
 					const factory = new DatabaseFactory(settings);
 					const hash = await util.computeSampleHash(localContent);
 					await (await factory.getServer()).upsertDocument({
@@ -58,53 +86,8 @@ export class CompareFiles {
 						hash: hash
 					});
 					new Notice('云端文件已被本地文件覆盖');
-				}},
-		).open();
-
-	/*	return new Promise<void>((resolve, reject) => {
-			swal("与云端文件内容对比", {
-				content: {
-					element: 'div',
-					attributes: {
-						innerHTML: comparisonHTML
-					}
-				},
-				buttons: {
-					pull: {
-						text: "拉取云端文件",
-						value: "pull",
-						className: "swal-button",
-					},
-					push: {
-						text: "使用本地文件覆盖云端",
-						value: "push",
-						className: "swal-button",
-					},
 				}
-			})
-				.then(async (value) => {
-					switch (value) {
-
-						case "pull":
-
-							await app.vault.modify(file, cloudResult.content);
-							new Notice('本地文件已被云端文件覆盖');
-							break;
-
-						case "push":
-							const factory = new DatabaseFactory(settings);
-							const hash = await util.computeSampleHash(localContent);
-							await (await factory.getServer()).upsertDocument({
-								_id: file.path,
-								content: localContent,
-								hash: hash
-							});
-							new Notice('云端文件已被本地文件覆盖');
-							break;
-
-
-					}
-				});
-		});*/
+			},
+		).open();
 	}
 }
