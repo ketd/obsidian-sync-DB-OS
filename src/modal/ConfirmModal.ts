@@ -31,7 +31,7 @@ export class ConfirmModal extends Modal {
 		console.log(this.innerHTML)
 
 		if (this.innerHTML) {
-			const htmlContainer = contentEl.createDiv({ cls: 'html-container' });
+			const htmlContainer = contentEl.createDiv();
 			htmlContainer.innerHTML = this.innerHTML; // Safely set the constructed HTML
 		}
 

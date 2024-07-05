@@ -7,9 +7,9 @@ import CryptoJS from "crypto-js";
 import {TencentOSServer} from "../util/os/TencentOSServer";
 import {Util} from "../util/Util";
 import {MultiSelectModal} from "../modal/MultiSelectModal";
-import {MyPluginSettings} from "../setting/SettingsData";
+import {syncDbOsPluginSettings} from "../setting/SettingsData";
 
-export async function push(app: App, settings: MyPluginSettings, factory: DatabaseFactory, statusBarItem: HTMLElement) {
+export async function push(app: App, settings: syncDbOsPluginSettings, factory: DatabaseFactory, statusBarItem: HTMLElement) {
 	const files = app.vault.getFiles();
 	const server = await factory.getServer();
 	const util = new Util()

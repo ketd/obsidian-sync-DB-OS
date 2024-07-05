@@ -1,7 +1,7 @@
 import { CouchDBServer } from './CouchDBServer';
 import MarkdownDocument from '../MarkdownDocument';
 import { Platform } from 'obsidian';
-import { MyPluginSettings } from "../../setting/SettingsData";
+import { syncDbOsPluginSettings } from "../../setting/SettingsData";
 
 interface IDatabaseServer {
 	testConnection(): Promise<boolean>;
@@ -17,7 +17,7 @@ interface IDatabaseServer {
 export class DatabaseFactory {
 	private server: IDatabaseServer | null = null;
 
-	constructor(private settings: MyPluginSettings) {
+	constructor(private settings: syncDbOsPluginSettings) {
 		// 初始化服务器
 		this.initializeServer().then(r => {});
 	}

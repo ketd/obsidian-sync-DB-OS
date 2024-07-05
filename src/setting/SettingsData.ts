@@ -1,4 +1,4 @@
-export interface MyPluginSettings {
+export interface syncDbOsPluginSettings {
 	//替换默认插入，直接使用图传
 	ReplacesTheDefaultInsert: boolean;
 	ObjectStorageProvider: string;
@@ -49,7 +49,7 @@ export interface MyPluginSettings {
 
 }
 
-export const DEFAULT_SETTINGS: MyPluginSettings = {
+export const DEFAULT_SETTINGS: syncDbOsPluginSettings = {
 
 	ReplacesTheDefaultInsert: false,
 	ObjectStorageProvider: 'tencent',

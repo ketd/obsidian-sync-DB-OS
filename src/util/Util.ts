@@ -2,7 +2,7 @@ import {App, Notice, TFile} from "obsidian";
 import CryptoJS from "crypto-js";
 import {TencentOSServer} from "./os/TencentOSServer";
 import {Snowflake} from "./Snowflake";
-import {MyPluginSettings} from "../setting/SettingsData";
+import {syncDbOsPluginSettings} from "../setting/SettingsData";
 import swal from "sweetalert";
 
 export class Util {

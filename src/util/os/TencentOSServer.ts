@@ -1,11 +1,11 @@
 import COS from 'cos-js-sdk-v5';
-import {MyPluginSettings} from "../../setting/SettingsData";
+import {syncDbOsPluginSettings} from "../../setting/SettingsData";
 
 
 export class TencentOSServer {
 	private cos: COS;
 
-	constructor(private settings: MyPluginSettings) {
+	constructor(private settings: syncDbOsPluginSettings) {
 		this.cos = new COS({
 			SecretId: this.settings.SecretIdByTencent,
 			SecretKey: this.settings.SecretKeyByTencent,

@@ -8,7 +8,7 @@ import {
 	Plugin, TAbstractFile,
 	TFile,
 } from 'obsidian';
-import { SampleSettingTab} from './setting/MyPluginSettings';
+import { syncDbOsSettingTab} from './setting/SyncDbOsPluginSettings';
 import {manualSyncing} from "./sync/ManualSyncing";
 import {pull} from "./sync/Pull";
 import {push} from "./sync/Push";
@@ -17,11 +17,11 @@ import {TencentOSServer} from "./util/os/TencentOSServer";
 import {Util} from "./util/Util";
 import {Handler} from "./util/Handler";
 import {ConfirmModal} from "./modal/ConfirmModal";
-import {DEFAULT_SETTINGS, MyPluginSettings} from "./setting/SettingsData";
+import {DEFAULT_SETTINGS, syncDbOsPluginSettings} from "./setting/SettingsData";
 
 
 export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
+	settings: syncDbOsPluginSettings;
 	factory: DatabaseFactory;
 	tencentOSServer: TencentOSServer
 	util: Util = new Util()
@@ -176,7 +176,7 @@ export default class MyPlugin extends Plugin {
 		});
 
 		// 这将添加一个设置选项卡，以便用户可以配置插件的各个方面
-		this.addSettingTab(new SampleSettingTab(this.app, this));
+		this.addSettingTab(new syncDbOsSettingTab(this.app, this));
 
 		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
 		// Using this function will automatically remove the event listener when this plugin is disabled.

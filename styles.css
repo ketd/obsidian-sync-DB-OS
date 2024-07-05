@@ -102,18 +102,3 @@ If your plugin does not need CSS, delete this file.
 	width: 100px; /* 根据需要调整按钮宽度 */
 }
 
-/* styles.css */
-.modal-content {
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	height: 100%;
-}
-
-.html-container {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	height: 100%;
-}

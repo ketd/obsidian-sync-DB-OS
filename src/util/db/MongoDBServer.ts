@@ -3,7 +3,7 @@ import {Collection, Db, MongoClient} from 'mongodb';
 
 import {Notice} from "obsidian";
 import MarkdownDocument from "../MarkdownDocument";
-import {MyPluginSettings} from "../../setting/SettingsData";
+import {syncDbOsPluginSettings} from "../../setting/SettingsData";
 
 
 export class MongoDBServer {
@@ -11,7 +11,7 @@ export class MongoDBServer {
 	private db: Db | null = null;
 	private collection: Collection<MarkdownDocument> | null = null;
 
-	constructor(private settings: MyPluginSettings) {
+	constructor(private settings: syncDbOsPluginSettings) {
 
 	}
 

@@ -2,7 +2,7 @@ import {Notice} from "obsidian";
 import MarkdownDocument from "../MarkdownDocument";
 import PouchDB from 'pouchdb-browser';
 import PouchDBFind from "pouchdb-find";
-import {MyPluginSettings} from "../../setting/SettingsData";
+import {syncDbOsPluginSettings} from "../../setting/SettingsData";
 
 PouchDB.plugin(PouchDBFind);
 
@@ -13,7 +13,7 @@ export class CouchDBServer {
     // private db: PouchDB.Database;
 	private db: PouchDB.Database;
 
-	constructor(private settings: MyPluginSettings) {
+	constructor(private settings: syncDbOsPluginSettings) {
 		// 注意：我们不能在构造函数中等待异步操作完成，
 		// 所以建议在调用init之后的其他地方处理实际的初始化逻辑。
 		this.init().then(() => {

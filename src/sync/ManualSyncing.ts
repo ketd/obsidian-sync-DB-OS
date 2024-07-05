@@ -4,9 +4,9 @@ import {CompareFiles} from "../util/CompareFiles";
 import {DatabaseFactory} from "../util/db/DatabaseFactory";
 import MarkdownDocument from "../util/MarkdownDocument";
 import {Util} from "../util/Util";
-import {MyPluginSettings} from "../setting/SettingsData";
+import {syncDbOsPluginSettings} from "../setting/SettingsData";
 
-export async function manualSyncing(env: MouseEvent, app: App, settings: MyPluginSettings, factory: DatabaseFactory) {
+export async function manualSyncing(env: MouseEvent, app: App, settings: syncDbOsPluginSettings, factory: DatabaseFactory) {
 	try {
 		const util = new Util()
 		const server = await factory.getServer();

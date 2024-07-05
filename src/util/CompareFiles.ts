@@ -4,10 +4,10 @@ import { DatabaseFactory } from "./db/DatabaseFactory";
 import MarkdownDocument from "./MarkdownDocument";
 import { Util } from "./Util";
 import { ConfirmModal } from "../modal/ConfirmModal";
-import { MyPluginSettings } from "../setting/SettingsData";
+import { syncDbOsPluginSettings } from "../setting/SettingsData";
 
 export class CompareFiles {
-	async showComparisonPopup(app: App, settings: MyPluginSettings, file: TFile, localContent: string, cloudResult: MarkdownDocument) {
+	async showComparisonPopup(app: App, settings: syncDbOsPluginSettings, file: TFile, localContent: string, cloudResult: MarkdownDocument) {
 		const diff = require('diff');
 		const util = new Util();
 

@@ -2,7 +2,7 @@ import {PluginSettingTab, Setting, Notice, App, Platform} from 'obsidian';
 import {DatabaseFactory} from "../util/db/DatabaseFactory";
 
 
-export class SampleSettingTab extends PluginSettingTab {
+export class syncDbOsSettingTab extends PluginSettingTab {
 	plugin: any;
 	inputOSElements: HTMLInputElement[] = []; // 用于存储特定输入元素的引用
 	inputDBElements: HTMLInputElement[] = []; // 用于存储特定输入元素的引用

@@ -5,11 +5,11 @@ import {Util} from "./Util";
 import {Snowflake} from "./Snowflake";
 import {CompareFiles} from "./CompareFiles";
 import {ConfirmModal} from "../modal/ConfirmModal";
-import {MyPluginSettings} from "../setting/SettingsData";
+import {syncDbOsPluginSettings} from "../setting/SettingsData";
 
 export class Handler {
 	app: App;
-	settings: MyPluginSettings;
+	settings: syncDbOsPluginSettings;
 	factory: DatabaseFactory;
 	tencentOSServer: TencentOSServer;
 	util: Util;
@@ -18,7 +18,7 @@ export class Handler {
 	lastUpdateTime = 0; // 记录上次更新时间戳
 	updatePending = false; // 记录是否有更新操作待处理
 
-	constructor(app: App, settings: MyPluginSettings, factory: DatabaseFactory, tencentOSServer: TencentOSServer) {
+	constructor(app: App, settings: syncDbOsPluginSettings, factory: DatabaseFactory, tencentOSServer: TencentOSServer) {
 		this.app = app;
 		this.settings = settings;
 		this.factory = factory;
