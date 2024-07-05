@@ -1,7 +1,7 @@
 {
 	"id": "obsidian-sync4-db-os",
 	"name": "同步插件cos",
-	"version": "1.0.0",
+	"version": "1.0.2",
 	"minAppVersion": "0.15.0",
 	"description": "这是一个用于同步的插件",
 	"author": "ketd",
