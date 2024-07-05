@@ -32,7 +32,7 @@ export class MongoDBServer {
 		this.collection = this.db.collection<MarkdownDocument>(this.settings.CollectionName);
 
 
-		console.log(`Successfully connected to database: ${this.db.databaseName} and collection: ${this.collection.collectionName}`);
+		//console.log(`Successfully connected to database: ${this.db.databaseName} and collection: ${this.collection.collectionName}`);
 	}
 
 
@@ -46,7 +46,7 @@ export class MongoDBServer {
 			new Notice('MongoDB连接成功');
 			return true;
 		} catch (error) {
-			console.error('Connection test failed:', error);
+			//console.error('Connection test failed:', error);
 			new Notice('MongoDB连接失败');
 			return false;
 		}
@@ -88,7 +88,7 @@ export class MongoDBServer {
 				? new Notice(`Successfully created a new game with id ${result.insertedId}`)
 				: new Notice("Failed to create a new game.");
 		} catch (error) {
-			console.error(error);
+			//console.error(error);
 			new Notice(error.message);
 		}
 	}
@@ -111,7 +111,7 @@ export class MongoDBServer {
 			return true;
 
 		} catch (error) {
-			console.error(error);
+			//console.error(error);
 
 			new Notice("上传失败" + new Date().toLocaleString())
 			return false;
@@ -137,7 +137,7 @@ export class MongoDBServer {
 
 			new Notice("文件重命名成功: " + new Date().toLocaleString());
 		} catch (error) {
-			console.error(error);
+			//console.error(error);
 			new Notice("文件重命名失败: " + new Date().toLocaleString());
 		}
 	}
@@ -149,7 +149,7 @@ export class MongoDBServer {
 			await this.collection.deleteOne({ _id: docId });
 			new Notice('文档删除成功');
 		} catch (error) {
-			console.error('文档删除失败:', error);
+		//	console.error('文档删除失败:', error);
 			new Notice('文档删除失败');
 		}
 	}

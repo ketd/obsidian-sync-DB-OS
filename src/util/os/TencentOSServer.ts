@@ -22,13 +22,13 @@ export class TencentOSServer {
 				Body: file,/* 必须，上传文件对象，可以是input[type="file"]标签选择本地文件后得到的file对象 */
 				SliceSize: 1024 * 1024 * 100,/* 触发分块上传的阈值，超过100MB使用分块上传，非必须 */
 				onTaskReady: (taskId) => { /* 非必须 */
-					console.log(taskId);
+					//console.log(taskId);
 				},
 				onProgress: (progressData) => { /* 非必须 */
-					console.log(JSON.stringify(progressData));
+					//console.log(JSON.stringify(progressData));
 				},
 				onFileFinish: (err, data, options) => {/* 非必须 */
-					console.log(options.Key + '上传' + (err ? '失败' : '完成'));
+					//console.log(options.Key + '上传' + (err ? '失败' : '完成'));
 				},
 				// 支持自定义headers 非必须
 				Headers: {
@@ -38,7 +38,7 @@ export class TencentOSServer {
 				if (err) {
 					reject(err);
 				} else {
-					console.log(data);
+					//console.log(data);
 					resolve('https://' + data.Location);
 				}
 			});
@@ -55,7 +55,7 @@ export class TencentOSServer {
 				Key: fileName,              /* 必须 */
 				DataType: 'arraybuffer',        /* 非必须 */
 				onProgress: function (progressData) {
-					console.log(JSON.stringify(progressData));
+				//	console.log(JSON.stringify(progressData));
 				}
 			}, function (err, data) {
 				if (err) {
@@ -73,7 +73,7 @@ export class TencentOSServer {
 			Region: this.settings.RegionByTencent,/* 存储桶所在地域，例如ap-beijing，必须字段 */
 			Key: filePath,              /* 必须 */
 		}, function(err, data) {
-			console.log(err || data);
+			//console.log(err || data);
 		});
 	}
 

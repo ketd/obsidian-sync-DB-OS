@@ -17,10 +17,10 @@ export class CouchDBServer {
 		// 注意：我们不能在构造函数中等待异步操作完成，
 		// 所以建议在调用init之后的其他地方处理实际的初始化逻辑。
 		this.init().then(() => {
-			console.log('CouchDB  初始化完成');
+			//console.log('CouchDB  初始化完成');
 			// 进行其他需要在初始化之后的操作
 		}).catch((error) => {
-			console.error('初始化失败:', error);
+			//console.error('初始化失败:', error);
 		});
 	}
 
@@ -35,9 +35,9 @@ export class CouchDBServer {
 
 		try {
 			this.db = new PouchDB(fullURL);
-			console.log('CouchDB 初始化成功');
+			//console.log('CouchDB 初始化成功');
 		} catch (error) {
-			console.error('Error initializing PouchDB instance:', error);
+			//console.error('Error initializing PouchDB instance:', error);
 			throw error;
 		}
 	}
@@ -45,11 +45,11 @@ export class CouchDBServer {
 	public async testConnection(): Promise<boolean> {
 		try {
 			const info = await this.db.info();
-			console.log('Database info:', info);
+			//console.log('Database info:', info);
 			new Notice('CouchDB连接成功');
 			return true;
 		} catch (error) {
-			console.error('Error testing connection:', error);
+			//console.error('Error testing connection:', error);
 			new Notice('CouchDB连接失败');
 			return false;
 		}
@@ -60,7 +60,7 @@ export class CouchDBServer {
 		try {
 
 			const existingDoc = await this.db.get<MarkdownDocument>(doc._id);
-			console.log("existingDoc", existingDoc);
+			//console.log("existingDoc", existingDoc);
 			doc._rev = existingDoc._rev;
 		} catch (err) {
 			if (err.status !== 404) {
@@ -74,10 +74,10 @@ export class CouchDBServer {
 			return true;
 		} catch (err) {
 			if (err.name === 'conflict') {
-				console.error('文档保存冲突:', err);
+				//console.error('文档保存冲突:', err);
 				new Notice('文档保存冲突!!');
 			} else {
-				console.error('文档保存失败:', err);
+				//console.error('文档保存失败:', err);
 				new Notice('文档保存失败!!');
 			}
 			return false;
@@ -92,7 +92,7 @@ export class CouchDBServer {
 			await this.db.remove(doc);
 			new Notice('文档删除成功');
 		} catch (error) {
-			console.error('文档删除失败:', error);
+			//console.error('文档删除失败:', error);
 			new Notice('文档删除失败');
 		}
 	}
@@ -105,7 +105,7 @@ export class CouchDBServer {
 			if (error.status === 404) {
 				return null;
 			} else {
-				//console.error('获取文档失败:', error);
+				////console.error('获取文档失败:', error);
 				new Notice('获取文档失败');
 				return null;
 			}
@@ -121,7 +121,7 @@ export class CouchDBServer {
 				.filter(row => !row.id.startsWith('_design/'))
 				.map(row => row.id);
 		} catch (error) {
-			console.error('获取所有文档ID失败:', error);
+			//console.error('获取所有文档ID失败:', error);
 			new Notice('获取所有文档ID失败');
 			throw error;
 		}
@@ -136,7 +136,7 @@ export class CouchDBServer {
 
 			return result.rows[0].value;
 		} catch (error) {
-			console.error('获取文档hash字段失败:', error);
+			//console.error('获取文档hash字段失败:', error);
 			throw error;
 		}
 	}
@@ -170,10 +170,10 @@ export class CouchDBServer {
 				skip += limit;
 			} while (result.docs.length === limit);
 
-			console.log(allDocs);
+			//console.log(allDocs);
 			return allDocs;
 		} catch (err) {
-			console.error(err);
+			//console.error(err);
 			throw err;
 		}
 	}
@@ -210,7 +210,7 @@ export class CouchDBServer {
 
 			new Notice("修改目录&重命名成功: " + new Date().toLocaleString());
 		} catch (error) {
-			console.error("修改目录&重命名失败:", error);
+			//console.error("修改目录&重命名失败:", error);
 			//new Notice("修改目录&重命名失败: " + new Date().toLocaleString());
 		}
 	}
@@ -221,7 +221,7 @@ export class CouchDBServer {
 			const response = await this.db.allDocs({ include_docs: true });
 			return response.rows.map(row => row.doc);
 		} catch (error) {
-			console.error('Error pulling data:', error);
+			//console.error('Error pulling data:', error);
 			throw error;
 		}
 	}
@@ -237,15 +237,15 @@ export class CouchDBServer {
 
 			response.forEach((resp:any, idx:any) => {
 				if (resp.error) {
-					console.error('Error pushing doc:', resp.error);
+					//console.error('Error pushing doc:', resp.error);
 				} else {
 					docs[idx]._rev = resp.rev; // 更新本地文档的 _rev
 				}
 			});
 
-			console.log('Local data pushed to cloud');
+			//console.log('Local data pushed to cloud');
 		} catch (error) {
-			console.error('Error pushing data:', error);
+			//console.error('Error pushing data:', error);
 			throw error;
 		}
 	}
@@ -257,13 +257,13 @@ export class CouchDBServer {
 			/*response.rows.forEach(async (row) => {
 				if (row.doc._conflicts) {
 					// 有冲突的文档处理逻辑
-					console.log(`冲突文档: ${row.id}`);
+					//console.log(`冲突文档: ${row.id}`);
 					// 需要实现合适的冲突处理策略
 				}
 			});*/
-			console.log('Conflicts handled');
+			//console.log('Conflicts handled');
 		} catch (error) {
-			console.error('Error handling conflicts:', error);
+			//console.error('Error handling conflicts:', error);
 			throw error;
 		}
 	}
@@ -277,6 +277,6 @@ export class CouchDBServer {
 			};
 		});
 
-		console.log('Auto save enabled');
+		//console.log('Auto save enabled');
 	}
 }

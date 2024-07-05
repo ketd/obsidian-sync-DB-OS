@@ -6,7 +6,7 @@ import { Util } from '../util/Util';
 export async function pull(app: App, factory: DatabaseFactory, tencentOSServer: TencentOSServer, statusBarItem: HTMLElement) {
 	const server = await factory.getServer();
 	const allDocumentIds = await server.getAllDocumentIds();
-	console.log(allDocumentIds);
+	//console.log(allDocumentIds);
 	const util = new Util();
 
 	// 初始化消息队列
@@ -75,7 +75,7 @@ export async function pull(app: App, factory: DatabaseFactory, tencentOSServer: 
 				try {
 					await util.createFolderIfNotExists(app, folderPath);
 				} catch (e) {
-					console.error('Error creating folder:', e);
+					//console.error('Error creating folder:', e);
 				}
 
 				// 创建文件

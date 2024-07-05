@@ -144,7 +144,7 @@ export class SampleSettingTab extends PluginSettingTab {
 				.addDropdown(dropdown => {
 					dropdown
 						.addOption('tencent', '腾讯云')
-						.addOption('aliyun', '阿里云')
+						//.addOption('aliyun', '阿里云')
 						.setValue(this.plugin.settings.ObjectStorageProvider)
 						.onChange(async (value) => {
 							this.plugin.settings.ObjectStorageProvider = value;
@@ -461,7 +461,7 @@ export class SampleSettingTab extends PluginSettingTab {
 				button
 					.setButtonText('测试连接')
 					.onClick(async () => {
-						console.log(this.plugin.settings)
+						//console.log(this.plugin.settings)
 						await (await factory.getServer()).testConnection().then(res => {})
 					});
 			});
@@ -634,6 +634,10 @@ export class SampleSettingTab extends PluginSettingTab {
 	}
 
 	displayAliyunSettings(containerEl: HTMLElement): void {
+
+		let isEdit = false;
+
+
 		containerEl.createEl("h3", {text: "阿里云OSS对象存储配置"});
 		const remark = containerEl.createEl("div", {cls: "remark"});
 		remark.createEl("div", {text: "如何获取", cls: "remark__title"});
@@ -669,6 +673,34 @@ export class SampleSettingTab extends PluginSettingTab {
 						this.plugin.settings.SecretKeyByAliyun = value;
 					});
 				this.inputOSElements.push(text.inputEl); // 存储输入元素的引用
+			});
+
+		// 保存/修改设置按钮
+		const editButtonSetting = new Setting(containerEl)
+			.addButton(button => {
+				button
+					.setButtonText('修改')
+					.onClick(async () => {
+						isEdit = !isEdit;
+						if (isEdit) {
+							// 启用所有输入框和切换
+							this.inputOSElements.forEach(input => {
+								input.disabled = false;
+								input.type= 'text';
+							});
+							button.setButtonText('保存');
+						} else {
+							// 保存设置并禁用所有输入框和切换
+							await this.plugin.saveSettings();
+							this.inputOSElements.forEach(input => {
+								input.disabled = true
+								//TODO 设置类型不能实现隐藏字段
+								input.type = 'password';
+							});
+							button.setButtonText('修改');
+							new Notice('保存成功');
+						}
+					});
 			});
 	}
 }

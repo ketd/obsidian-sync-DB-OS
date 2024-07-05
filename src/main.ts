@@ -16,10 +16,9 @@ import {DatabaseFactory} from "./util/db/DatabaseFactory";
 import {TencentOSServer} from "./util/os/TencentOSServer";
 import {Util} from "./util/Util";
 import {Handler} from "./util/Handler";
-import swal from 'sweetalert';
 import {ConfirmModal} from "./modal/ConfirmModal";
-import {MultiSelectModal} from "./modal/MultiSelectModal";
 import {DEFAULT_SETTINGS, MyPluginSettings} from "./setting/SettingsData";
+
 
 export default class MyPlugin extends Plugin {
 	settings: MyPluginSettings;
@@ -115,6 +114,7 @@ export default class MyPlugin extends Plugin {
 			// 在用户单击图标时调用。
 			await push(this.app, this.settings, this.factory,statusBarItem);
 		});
+
 
 
 		const pullIconEl = this.addRibbonIcon('git-pull-request', '拉取云端', async (evt: MouseEvent) => {

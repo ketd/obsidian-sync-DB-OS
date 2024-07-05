@@ -12,7 +12,7 @@ export async function manualSyncing(env: MouseEvent, app: App, settings: MyPlugi
 		const server = await factory.getServer();
 		const files = app.vault.getFiles();
 		const allDocumentIds = await server.getAllDocumentIds();
-		console.log("allDocumentIds"+allDocumentIds);
+		//console.log("allDocumentIds"+allDocumentIds);
 		const markdownDocumentHash = await server.getAllDocumentHash();
 
 		for (const file of files) {
@@ -25,9 +25,9 @@ export async function manualSyncing(env: MouseEvent, app: App, settings: MyPlugi
 				//没有或者不相同
 				if (!markdownDocument) {
 					const cloudResult = await server.getDocument(file.path);
-					console.log("cloudResult"+cloudResult);
+					//console.log("cloudResult"+cloudResult);
 					if (cloudResult!==null) {
-						console.log(`本地内容和云内容不同:${file.path}`);
+						//console.log(`本地内容和云内容不同:${file.path}`);
 						// 你可以在这里添加你的逻辑，比如提示用户同步差异，或者自动同步
 						const compareFile = new CompareFiles()
 
@@ -35,12 +35,12 @@ export async function manualSyncing(env: MouseEvent, app: App, settings: MyPlugi
 						await compareFile.showComparisonPopup(this.app, settings, file, await app.vault.read(file), cloudResult);
 					} else {
 						//没有
-						console.log(`云端不存在，你还没有上传:${file.path}`);
+						//console.log(`云端不存在，你还没有上传:${file.path}`);
 						new Notice('云端不存在，你还没有上传:' + file.path);
 					}
 
 				} else {
-					console.log(`本地内容和云内容相同:${file.path}`);
+					//console.log(`本地内容和云内容相同:${file.path}`);
 					new Notice('本地内容和云内容相同:' + file.path);
 				}
 			}

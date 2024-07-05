@@ -30,7 +30,7 @@ export class Handler {
 	async CreateHandler(file: TAbstractFile, isPulling: boolean) {
 		const server = await this.factory.getServer();
 		const allDocumentIds = await server.getAllDocumentIds();
-		console.log(!allDocumentIds.indexOf(file.path));
+		//console.log(!allDocumentIds.indexOf(file.path));
 		if (!isPulling && file instanceof TFile && file.extension === 'pdf' && allDocumentIds.indexOf(file.path)) {
 			//const content = await this.app.vault.read(file);
 			try {
@@ -64,7 +64,7 @@ export class Handler {
 				}
 
 			} catch (error) {
-				console.error('Error upserting document:', error);
+				//console.error('Error upserting document:', error);
 				// Handle error if needed
 			}
 		} else if (file instanceof TFile && file.extension === 'md' && allDocumentIds.indexOf(file.path)) {
@@ -176,10 +176,10 @@ export class Handler {
 						await compareFile.showComparisonPopup(this.app, this.settings, file, fileContent, cloudContent);
 					}
 				} else {
-					console.log(`本地内容和云内容相同${file.path}`);
+					//console.log(`本地内容和云内容相同${file.path}`);
 				}
 			} else {
-				console.log(`未找到${file.path}`);
+				//console.log(`未找到${file.path}`);
 			}
 		}
 		//TODO npm install blake3-wasm无法使用
@@ -222,7 +222,7 @@ export class Handler {
 
 
 								} catch (e) {
-									console.log(e)
+									//console.log(e)
 								}
 								new Notice('本地文件已被云端文件覆盖');
 							}

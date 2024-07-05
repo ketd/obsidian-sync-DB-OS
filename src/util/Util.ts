@@ -25,12 +25,12 @@ export class Util {
 			const completeFilePath = `${folderPath}/${filePath.substring(filePath.lastIndexOf('/') + 1)}`;
 			try {
 				await adapter.writeBinary(completeFilePath, fileContent);
-				console.log("PDF文件保存成功");
+				//console.log("PDF文件保存成功");
 			} catch (e) {
-				console.log("保存PDF文件时发生错误:", e);
+				//console.log("保存PDF文件时发生错误:", e);
 			}
 		} else {
-			console.log("当前环境不支持直接文件写入");
+			//console.log("当前环境不支持直接文件写入");
 		}
 	}
 
@@ -127,11 +127,11 @@ export class Util {
 				// 处理完整路径，支持嵌套文件夹
 				if (app.vault.getAbstractFileByPath(imagePath) instanceof TFile) {
 					imageFile = app.vault.getAbstractFileByPath(imagePath);
-					console.log(`Image found: ${file.path}`);
+					//console.log(`Image found: ${file.path}`);
 					break;
 				} else if (file.name === imagePath.replace(/.*\//, '')) {
 					imageFile = file;
-					console.log(`Image found by name: ${file.path}`);
+				//	console.log(`Image found by name: ${file.path}`);
 					break;
 				}
 			}
@@ -160,7 +160,7 @@ export class Util {
 					newContent = newContent.replace(match[0], `![${fileName}](${imageUrl})`);
 				} catch (error) {
 					new Notice(`上传图片失败：${imageFile.path}`);
-					console.error(error);
+					//console.error(error);
 				}
 			} else if (!imageFile) {
 				new Notice(`本地图片不存在：${imagePath}`);

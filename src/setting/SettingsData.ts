@@ -10,8 +10,8 @@ export interface MyPluginSettings {
 	BucketByTencent: string;
 	RegionByTencent: string;
 	//阿里云
-	SecretIdByAliyun: string;
-	SecretKeyByAliyun: string;
+	AccessKeyIdByAliyun: string;
+	AccessKeySecretByAliyun: string;
 	BucketByAliyun: string;
 	RegionByAliyun: string;
 
@@ -29,8 +29,6 @@ export interface MyPluginSettings {
 	DateBaseNameByCouchDB: string;
 
 	//MongoDB
-
-
 	URLByMongoDB: string;
 	PortByMongoDB: string;
 	USerNameByMongoDB: string;
@@ -60,8 +58,8 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	SecretKeyByTencent: '',
 	BucketByTencent: '',
 	RegionByTencent: '',
-	SecretIdByAliyun: '',
-	SecretKeyByAliyun: '',
+	AccessKeyIdByAliyun: '',
+	AccessKeySecretByAliyun: '',
 	BucketByAliyun: '',
 	RegionByAliyun: '',
 

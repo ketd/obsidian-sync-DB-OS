@@ -74,7 +74,7 @@ export async function push(app: App, settings: MyPluginSettings, factory: Databa
 			const remoteDocument = await server.getDocument(documentId);
 
 			if (!remoteDocument) {
-				console.log('cloud not found,开始上传');
+				//console.log('cloud not found,开始上传');
 				// 云端不存在，直接上传
 				const content = await app.vault.read(file);
 				const hash = await util.computeSampleHash(content);
@@ -122,7 +122,7 @@ export async function push(app: App, settings: MyPluginSettings, factory: Databa
 				}
 
 			} catch (error) {
-				console.error('Error upserting document:', error);
+				//console.error('Error upserting document:', error);
 				// Handle error if needed
 			}
 		}

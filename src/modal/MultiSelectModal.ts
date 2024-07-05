@@ -82,7 +82,6 @@ export class MultiSelectModal extends Modal {
 			btnElement.classList.add('confirm-button');
 			btnElement.disabled = config.text === '确认推送' && this.selectedItems.size === 0; // 设置初始禁用状态
 			btnElement.addEventListener('click', () => {
-				console.log('clicked');
 				this.close();
 				this.onSubmit(Array.from(this.selectedItems));
 				config.onClick();
