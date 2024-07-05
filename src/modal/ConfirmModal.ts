@@ -5,30 +5,28 @@ import { ButtonConfig } from "./ButtonConfig";
 export class ConfirmModal extends Modal {
 	title?: string;
 	innerHTML?: string;
-	minWidth?: number;
-	minHeight?: number;
+	isCompareFilesConfirmModal?: boolean;
 	buttonConfigs: ButtonConfig[];
 
 	constructor(app: App,
 				title?: string,
 				innerHTML?: string,
-				minWidth?: number,
-				minHeight?: number,
+				isCompareFilesConfirmModal?: boolean,
 				...buttonConfigs: ButtonConfig[]) {
 		super(app);
 		this.title = title;
 		this.innerHTML = innerHTML;
-		this.minWidth = minWidth;
-		this.minHeight = minHeight;
+		this.isCompareFilesConfirmModal = isCompareFilesConfirmModal;
 		this.buttonConfigs = buttonConfigs;
 	}
 
 	onOpen() {
 		const { contentEl } = this;
 
+
+
 		contentEl.createEl("h3", { text: this.title || "默认标题" });
 
-		console.log(this.innerHTML)
 
 		if (this.innerHTML) {
 			const htmlContainer = contentEl.createDiv();
@@ -52,8 +50,16 @@ export class ConfirmModal extends Modal {
 				);
 		});
 
-		// Adjust modal size
-		this.adjustModalSize();
+		const modalContainer = contentEl.parentElement;
+		if(modalContainer){
+			if(this.isCompareFilesConfirmModal){
+				contentEl.parentElement.addClass('compare-files-confirm-modal-container')
+			}else{
+				contentEl.parentElement.addClass('confirm-modal-container' )
+			}
+		}
+
+
 	}
 
 	onClose() {
@@ -61,11 +67,4 @@ export class ConfirmModal extends Modal {
 		contentEl.empty();
 	}
 
-	adjustModalSize() {
-		const modalContainer = this.contentEl.parentElement;
-		if (modalContainer) {
-			modalContainer.style.minWidth = `${this.minWidth}px` || "400px"; // Adjust as needed
-			modalContainer.style.minHeight = `${this.minHeight}px` || "300px"; // Adjust as needed
-		}
-	}
 }

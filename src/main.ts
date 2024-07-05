@@ -32,7 +32,8 @@ export default class MyPlugin extends Plugin {
 		this.factory = new DatabaseFactory(this.settings);
 		this.tencentOSServer = new TencentOSServer(this.settings)
 		const handler = new Handler(this.app, this.settings, this.factory, this.tencentOSServer)
-
+// 这将添加一个设置选项卡，以便用户可以配置插件的各个方面
+		this.addSettingTab(new syncDbOsSettingTab(this.app, this));
 
 		this.registerEvent(
 			this.app.vault.on('create', async (file) => {
@@ -86,8 +87,7 @@ export default class MyPlugin extends Plugin {
 					this.app,
 					'这将把你md文档中的连接本地图片全部替换为网络图片',
 					undefined, // 如果没有 HTML 可以传入 undefined
-					undefined,
-					undefined,
+					false,
 					{
 						text: '替换当前文件夹', onClick: async () => {
 							await this.util.replaceLocalImagesWithCloudUrls(this.app,false, this.tencentOSServer);

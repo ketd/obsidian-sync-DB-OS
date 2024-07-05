@@ -101,4 +101,30 @@ If your plugin does not need CSS, delete this file.
 	flex: none; /* 确保按钮不会拉伸 */
 	width: 100px; /* 根据需要调整按钮宽度 */
 }
+.comparison-container{
+	display: flex;
+	width: 100%;
+}
+.local-file-div{
+	flex: 1;
+	padding-right: 10px;
+}
+.local-file-content{
+	padding: 10px;
+}
+.cloud-file-div{
+	flex: 1;
+    padding-left: 10px;
+}
+.cloud-file-content{
+	padding: 10px;
+}
+.confirm-modal-container{
+	min-height: 250px;
+	min-width: 300px;
+}
 
+.compare-files-confirm-modal-container{
+	min-height: 800px;
+	min-width: 1200px;
+}

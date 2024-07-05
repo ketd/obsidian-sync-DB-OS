@@ -200,8 +200,7 @@ export class Handler {
 						this.app,
 						'与云端同名pdf文件内容不同',
 						undefined, // 如果没有 HTML 可以传入 undefined
-						undefined,
-						undefined,
+						false,
 						{
 							text: '重命名此pdf为副本，并且将此pdf上传至云端，同时下载云端同名pdf', onClick: async () => {
 								try {
