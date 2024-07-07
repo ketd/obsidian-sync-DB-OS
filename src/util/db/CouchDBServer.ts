@@ -129,17 +129,23 @@ export class CouchDBServer {
 
 	public async getDocumentHash(_id: string): Promise<string> {
 		try {
-			const result = await this.db.query('docs/hash', {
-				key: _id,
-				include_docs: false // 不包含完整的文档内容，只返回视图映射函数中的值
+			const result = await this.db.find({
+				selector: { _id: _id },
+				fields: ['hash']
 			});
 
-			return result.rows[0].value;
+			if (result.docs.length > 0) {
+				const markdownDocument = result.docs[0] as MarkdownDocument;
+				return markdownDocument.hash;
+			} else {
+				throw new Error('No document found with the given _id');
+			}
 		} catch (error) {
 			//console.error('获取文档hash字段失败:', error);
 			throw error;
 		}
 	}
+
 
 
 
