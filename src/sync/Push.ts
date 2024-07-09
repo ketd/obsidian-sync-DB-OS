@@ -1,5 +1,5 @@
-import { App, TFile, Notice } from 'obsidian';
-import { MongoDBServer } from '../util/db/MongoDBServer';
+import {App, TFile, Notice} from 'obsidian';
+import {MongoDBServer} from '../util/db/MongoDBServer';
 
 import {CompareFiles} from "../util/CompareFiles";
 import {DatabaseFactory} from "../util/db/DatabaseFactory";
@@ -14,19 +14,26 @@ export async function push(app: App, settings: syncDbOsPluginSettings, factory: 
 	const server = await factory.getServer();
 	const util = new Util()
 
-
 	let isUpdatedFiles: TFile[] = [];
 	const markdownDocumentHash = await server.getAllDocumentHash();
-	const markdownDocumentIds = await  server.getAllDocumentIds()
+	const markdownDocumentIds = await server.getAllDocumentIds()
 	for (const file of files) {
-		if(file.extension == 'md'){
-			const content = await app.vault.read(file);
-			const hash = await util.computeSampleHash(content);
-			const markdownDocument = markdownDocumentHash.find(doc => doc.hash === hash);
-			if(!markdownDocument){
+		const content = await app.vault.read(file);
+
+		if (file.extension === 'pdf') {
+			const markdownDocument = markdownDocumentHash.find(doc => doc._id === file.path);
+			if (!markdownDocument) {
 				isUpdatedFiles.push(file);
 			}
 		}
+		if (file.extension === 'md') {
+			const hash = await util.computeSampleHash(content);
+			const markdownDocument = markdownDocumentHash.find(doc => doc.hash === hash);
+			if (!markdownDocument) {
+				isUpdatedFiles.push(file);
+			}
+		}
+
 
 	}
 
@@ -37,24 +44,62 @@ export async function push(app: App, settings: syncDbOsPluginSettings, factory: 
 		"您对以下内容做出了修改",
 		isUpdatedFiles,
 		(result) => {
-			selectedFiles=result
+			selectedFiles = result
 		},
 		{
 			text: '确认推送', onClick: async () => {
-				try{
-					for(const file of selectedFiles){
+				try {
+					for (const file of selectedFiles) {
 
-						const content = await app.vault.read(file);
-						const hash = await util.computeSampleHash(content);
-						await server.upsertDocument({
-							_id: file.path,
-							content: content,
-							hash: hash
-						});
+						if (file.extension === 'md') {
+							const content = await app.vault.read(file);
+							const hash = await util.computeSampleHash(content);
+							await server.upsertDocument({
+								_id: file.path,
+								content: content,
+								hash: hash
+							});
+						} else if (file.extension === 'pdf') {
+							try {
+								const tencentOSServer = new TencentOSServer(settings)
+								// 读取文件内容
+								const content = await this.app.vault.read(file);
+								// 计算文件哈希值（SHA-1）
+								const hash = await util.computeSampleHash(content);
+
+								const success = await server.upsertDocument({
+									_id: file.path,
+									content: hash,
+									fileType: "pdf",
+									hash: hash
+								});
+
+								if (success) {
+
+									// 创建 File 对象
+									// 读取文件内容为 ArrayBuffer
+									const adapter = this.app.vault.adapter;
+									const arrayBuffer = await adapter.readBinary(file.path);
+
+									// 将 ArrayBuffer 转换为 Blob，然后创建一个新的 File 对象
+									const blob = new Blob([arrayBuffer], {type: 'application/pdf'});
+									const newFile = new File([blob], file.name, {
+										type: 'application/pdf',
+										lastModified: new Date().getTime()
+									});
+									await tencentOSServer.uploadFileToOS(newFile, file.path);
+								}
+
+							} catch (error) {
+								//console.error('Error upserting document:', error);
+								// Handle error if needed
+							}
+						}
+
 					}
 					new Notice('全部笔记已推送完成!');
-				}catch (e) {
-					new Notice('笔记推送失败!!!'+e);
+				} catch (e) {
+					new Notice('笔记推送失败!!!' + e);
 				}
 
 			}

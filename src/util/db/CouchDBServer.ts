@@ -167,7 +167,7 @@ export class CouchDBServer {
 			do {
 				result = await this.db.find({
 					selector: { _id: { $gte: null } },
-					fields: ['_id', 'hash'],
+					fields: ['_id','hash'],
 					limit: limit,
 					skip: skip
 				});
