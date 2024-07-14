@@ -128,3 +128,15 @@ If your plugin does not need CSS, delete this file.
 	min-height: 800px;
 	min-width: 1200px;
 }
+
+.diff-added {
+	color: green;
+}
+
+.diff-removed {
+	color: red;
+}
+
+.diff-unchanged {
+	color: black;
+}

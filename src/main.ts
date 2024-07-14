@@ -20,7 +20,7 @@ import {ConfirmModal} from "./modal/ConfirmModal";
 import {DEFAULT_SETTINGS, syncDbOsPluginSettings} from "./setting/SettingsData";
 
 
-export default class MyPlugin extends Plugin {
+export default class syncDbOsPlugin extends Plugin {
 	settings: syncDbOsPluginSettings;
 	factory: DatabaseFactory;
 	tencentOSServer: TencentOSServer
