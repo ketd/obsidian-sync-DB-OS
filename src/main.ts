@@ -99,7 +99,7 @@ export default class syncDbOsPlugin extends Plugin {
 						}
 					},
 					{
-						text: '取消', onClick: () => console.log('取消按钮被点击')
+						text: '取消', onClick: () => {}
 					},
 				).open();
 

@@ -51,7 +51,7 @@ export async function pull(app: App, factory: DatabaseFactory, tencentOSServer: 
 
 	// 延迟函数
 	function delay(ms: number) {
-		return new Promise(resolve => setTimeout(resolve, ms));
+		return sleep(ms);
 	}
 
 	for (const id of allDocumentIds) {

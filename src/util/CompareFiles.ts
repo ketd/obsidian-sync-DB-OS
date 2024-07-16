@@ -5,13 +5,14 @@ import MarkdownDocument from "./MarkdownDocument";
 import { Util } from "./Util";
 import { ConfirmModal } from "../modal/ConfirmModal";
 import { syncDbOsPluginSettings } from "../setting/SettingsData";
+import {diffLines} from 'diff';
 
 export class CompareFiles {
 	async showComparisonPopup(app: App, settings: syncDbOsPluginSettings, file: TFile, localContent: string, cloudResult: MarkdownDocument) {
 		const diff = require('diff');
 		const util = new Util();
 
-		const diffResult = diff.diffLines(localContent, cloudResult.content);
+		const diffResult = diffLines(localContent, cloudResult.content);
 
 		const comparisonContainer = document.createElement('div');
 		comparisonContainer.addClass('comparison-container');

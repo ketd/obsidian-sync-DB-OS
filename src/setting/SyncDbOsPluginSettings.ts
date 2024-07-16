@@ -21,12 +21,11 @@ export class syncDbOsSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		containerEl.createEl("h1", {text: "同步插件配置"});
-
-		containerEl.createEl("h1", {text: ""});
+		new Setting(containerEl).setName("同步插件配置").setHeading()
 
 
-		containerEl.createEl("h2", {text: "默认插入配置"});
+
+		new Setting(containerEl).setName("默认插入配置").setHeading()
 
 
 
@@ -43,7 +42,9 @@ export class syncDbOsSettingTab extends PluginSettingTab {
 			});
 
 		if(this.plugin.settings.IsUpdateDoc){
-			containerEl.createEl("h1", {text: "数据库配置"});
+
+			new Setting(containerEl).setName("数据库配置").setHeading()
+
 			// 对象存储服务商选择项
 
 			new Setting(containerEl)
@@ -135,7 +136,8 @@ export class syncDbOsSettingTab extends PluginSettingTab {
 			});
 
 		if(this.plugin.settings.ReplacesTheDefaultInsert){
-			containerEl.createEl("h2", {text: "对象存储配置"});
+			new Setting(containerEl).setName("对象存储配置").setHeading()
+
 
 			// 对象存储服务商选择项
 			new Setting(containerEl)
@@ -163,7 +165,7 @@ export class syncDbOsSettingTab extends PluginSettingTab {
 
 
 
-		containerEl.createEl("h2", {text: "其他配置"});
+		new Setting(containerEl).setName("其他配置").setHeading()
 		// 是否保存到本地设置项
 		new Setting(containerEl)
 			.setName('是否保存到本地')
@@ -229,7 +231,7 @@ export class syncDbOsSettingTab extends PluginSettingTab {
 	displayMongoDBSettings(containerEl: HTMLElement): void {
 
 		const factory = new DatabaseFactory(this.plugin.settings);
-		containerEl.createEl("h3", {text: "MongoDB配置"});
+		new Setting(containerEl).setName("MongoDB配置").setHeading();
 
 		// URL 设置项
 		new Setting(containerEl)
@@ -355,7 +357,8 @@ export class syncDbOsSettingTab extends PluginSettingTab {
 		const factory =  new DatabaseFactory(this.plugin.settings);
 
 
-		containerEl.createEl("h3", {text: "CouchDB配置"});
+		new Setting(containerEl).setName("CouchDB配置").setHeading();
+
 
 		// URL 设置项
 		new Setting(containerEl)
@@ -478,7 +481,8 @@ export class syncDbOsSettingTab extends PluginSettingTab {
 	}
 
 	displayTencentSettings(containerEl: HTMLElement): void {
-		containerEl.createEl("h3", {text: "腾讯云COS对象存储配置"});
+
+		new Setting(containerEl).setName("腾讯云COS对象存储配置").setHeading()
 		const remark = containerEl.createEl("div", {cls: "remark"});
 
 		remark.createEl("div", {text: "如何获取", cls: "remark__title"});
@@ -487,7 +491,7 @@ export class syncDbOsSettingTab extends PluginSettingTab {
 			cls: "book__author"
 		});
 
-		// 在 remark 容器中创建表格
+		/*// 在 remark 容器中创建表格
 		const table = remark.createEl("table", {cls: "storage-config-table"});
 
 		// 创建表头
@@ -534,7 +538,7 @@ export class syncDbOsSettingTab extends PluginSettingTab {
 		remark.createEl("small", {
 			text: "如果不知道如何设置，请参考 https://cloud.tencent.com/document/product/436/13318",
 			cls: "remark__author"
-		});
+		});*/
 
 		let isEdit = false;
 
@@ -638,7 +642,7 @@ export class syncDbOsSettingTab extends PluginSettingTab {
 		let isEdit = false;
 
 
-		containerEl.createEl("h3", {text: "阿里云OSS对象存储配置"});
+		new Setting(containerEl).setName("阿里云OSS对象存储配置").setHeading();
 		const remark = containerEl.createEl("div", {cls: "remark"});
 		remark.createEl("div", {text: "如何获取", cls: "remark__title"});
 		remark.createEl("small", {
