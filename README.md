@@ -29,8 +29,8 @@
 |                   |  腾讯云  |  阿里云  |
 | ----------------- | :---: | :---: |
 | 是否脱离数据库           |   ×   |   ×   |
-| 保存多种数据格式          |   √   |   √   |
-| 支持本地图片<br>自动部署到图床 | <br>√ | <br>√ |
+| 保存多种数据格式          |   √   |   ×   |
+| 支持本地图片<br>自动部署到图床 | <br>√ | <br>× |
 
 ## 使用的库
 
@@ -45,11 +45,11 @@
 
 1. 克隆此仓库到本地。
    ```sh
-   git clone https://github.com/your-username/your-repo.git
+   git clone https://github.com/ketd/obsidian-sync-DB-OS.git
    ```
 2. 进入项目目录。
    ```sh
-   cd your-repo
+   cd obsidian-sync-DB-OS
    ```
 3. 安装依赖。
    ```sh
